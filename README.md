@@ -1,13 +1,5 @@
 # FreeRP
 
-```meraid
-flowchart TD
-    A[Christmas] -->|Get money| B(Go shopping)
-    B --> C{Let me think}
-    C -->|One| D[Laptop]
-    C -->|Two| E[iPhone]
-    C -->|Three| F[fa:fa-car Car]
-```
+Is a first experimental attempt to develop a plugin webhost
 
-## ToDo
-Database conflict role and project
+[more here](https://github.com/MyFreeRP)
