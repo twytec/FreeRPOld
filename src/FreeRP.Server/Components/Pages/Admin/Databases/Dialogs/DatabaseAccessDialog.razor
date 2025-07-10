@@ -1,0 +1,95 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+
+<MudDialog>
+    <DialogContent>
+        @if (Content is not null)
+        {
+            <div style="display: grid; grid-template-rows: 1fr 60px;">
+                <div style="height: calc(100vh - 70px); overflow-y: auto;">
+                    <MudPaper Class="pa-4" Outlined="true">
+                        @if (_users is not null)
+                        {
+                            <MudSelect T="string" Label="@i18n.Text.User" ValueChanged="UserSelectChanged">
+                                @foreach (var item in _users)
+                                {
+                                    <MudSelectItem Value="@item.UserId">@item.GetName()</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else if (_roles is not null)
+                        {
+                            <MudSelect T="string" Label="@i18n.Text.Role" ValueChanged="RoleSelectChanged">
+                                @foreach (var item in _roles)
+                                {
+                                    <MudSelectItem Value="@item.RoleId">@item.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                    </MudPaper>
+                    @if (_viewModel is not null && _viewModel.Loaded)
+                    {
+                        <MudDataGrid Class="mt-4" Items="_viewModel.All" Elevation="2" SortMode="SortMode.Multiple" Filterable="true" ShowMenuIcon="true" Hideable="true">
+                            <Columns>
+                                <TemplateColumn Title="@i18n.Text.Name">
+                                    <CellTemplate>
+                                        @if (context.Item.Value.IsDataset)
+                                        {
+                                            <MudText Color="Color.Primary">@context.Item.Value.Path</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>@context.Item.Value.Path</MudText>
+                                        }
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="@i18n.Text.Read">
+                                    <CellTemplate>
+                                        <MudSelect T="FreeRP.FrpPermissionValue" ValueChanged="context.Item.Value.ReadSelectionChanged" Value="context.Item.Value.PermissionValues.Read">
+                                            <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                                        </MudSelect>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="@i18n.Text.Add">
+                                    <CellTemplate>
+                                        <MudSelect T="FreeRP.FrpPermissionValue" ValueChanged="context.Item.Value.AddSelectionChanged" Value="context.Item.Value.PermissionValues.Add">
+                                            <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                                        </MudSelect>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="@i18n.Text.Delete">
+                                    <CellTemplate>
+                                        <MudSelect T="FreeRP.FrpPermissionValue" ValueChanged="context.Item.Value.DeleteSelectionChanged" Value="context.Item.Value.PermissionValues.Delete">
+                                            <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                                        </MudSelect>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="@i18n.Text.Change">
+                                    <CellTemplate>
+                                        <MudSelect T="FreeRP.FrpPermissionValue" ValueChanged="context.Item.Value.ChangeSelectionChanged" Value="context.Item.Value.PermissionValues.Change">
+                                            <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                                            <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                                        </MudSelect>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    }
+                </div>
+                <MudStack Row="true" Spacing="1" Justify="Justify.FlexEnd">
+                    <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="Save">@i18n.Text.Save</MudButton>
+                </MudStack>
+            </div>
+        }
+    </DialogContent>
+</MudDialog>

@@ -1,0 +1,79 @@
+﻿@using FreeRP.User
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<MudDialog>
+    <DialogContent>
+        @if (_user is not null)
+        {
+            <MudForm @bind-IsValid="_isValid">
+                <MudTextField @bind-Value="_user.Email" ReadOnly="ReadOnly" InputType="InputType.Email" Label="@i18n.Text.Email"
+                              Required="true" RequiredError="@i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Email)" />
+
+                <MudTextField @bind-Value="_user.FirstName" ReadOnly="ReadOnly" InputType="InputType.Text" Label="@i18n.Text.FirstName" />
+                <MudTextField @bind-Value="_user.LastName" ReadOnly="ReadOnly" InputType="InputType.Text" Label="@i18n.Text.Lastname" />
+                <MudTextField @bind-Value="_user.Phone" ReadOnly="ReadOnly" InputType="InputType.Telephone" Label="@i18n.Text.Phone" />
+                <MudTextField @bind-Value="_user.Note" ReadOnly="ReadOnly" InputType="InputType.Text" Label="@i18n.Text.Note" Lines="3" />
+
+                @if (NewUser)
+                {
+                    <MudDatePicker Label="@i18n.Text.ExpirationDate" @bind-Date="_date" />
+
+                    <MudCheckBox @bind-Value="_user.IsLock" Label="@i18n.Text.IsLocked"></MudCheckBox>
+                }
+                else
+                {
+                    <MudCheckBox @bind-Value="_user.IsLock" ReadOnly="ReadOnly" Label="@i18n.Text.IsLocked"></MudCheckBox>
+                }
+
+            </MudForm>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        @if (ReadOnly == false)
+        {
+            <MudButton Disabled="(_isValid == false)" Color="Color.Primary" OnClick="Save">@i18n.Text.Ok</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public FrpUser Content { get; set; } = default!;
+
+    [Parameter]
+    public bool NewUser { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private FrpUser? _user = null;
+    private bool _isValid = false;
+    private DateTime? _date = DateTime.Now.AddYears(1);
+
+    protected override void OnParametersSet()
+    {
+        if (_user == null)
+        {
+            _user = Content.Clone();
+        }
+    }
+
+    void Cancel() => Dialog.Cancel();
+
+    private void Save()
+    {
+        if (NewUser && _user is not null && _date is not null)
+        {
+            _user.UtcDateTime = FrpUtcDateTime.FromDateTime(_date.Value.ToUniversalTime());
+        }
+
+        Content.MergeFrom(_user);
+        Dialog.Close();
+    }
+}

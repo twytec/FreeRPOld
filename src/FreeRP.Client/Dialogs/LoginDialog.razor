@@ -1,0 +1,59 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject FreeRP.FrpServices.IFrpDataService ds
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_user.Email" InputType="InputType.Email" Label="@i18n.Text.Email" />
+
+        @if (ds.FrpAuthService.FrpConnectResponse.Passwordless == false)
+        {
+            <MudTextField @bind-Value="_user.Password" InputType="InputType.Password" Label="@i18n.Text.Password" />
+        }
+        @if (_err is not null)
+        {
+            <MudText Color="Color.Error">@_err</MudText>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Ok">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    private FreeRP.User.FrpUser _user = new();
+    private string? _err = null;
+
+    private async Task Ok()
+    {
+        if (string.IsNullOrWhiteSpace(_user.Email))
+        {
+            _err = i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Email);
+            return;
+        }
+
+        if (ds.FrpAuthService.FrpConnectResponse.Passwordless == false)
+        {
+            if (string.IsNullOrWhiteSpace(_user.Password))
+            {
+                _err = i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Password);
+                return;
+            }
+        }
+
+        try
+        {
+            await ds.FrpAuthService.LoginAsync(_user);
+            Dialog.Close();
+        }
+        catch (Exception ex)
+        {
+            _err = ex.Message;
+            return;
+        }
+    }
+}

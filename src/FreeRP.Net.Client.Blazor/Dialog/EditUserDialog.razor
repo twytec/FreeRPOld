@@ -1,0 +1,241 @@
+﻿@implements IDialogContentComponent<GrpcService.Core.User>
+@inject Translation.I18nService i18n
+@inject Client.GrpcServices.AdminService adminService
+@inject Client.GrpcServices.UserService userService
+@inject Dialog.BusyDialogService busyDialogService
+@inject IDialogService dlg
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">
+        @i18n.Text.User
+    </FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <FluentStack VerticalGap="MainLayout.StackGap" Orientation="Orientation.Vertical">
+        <form @onsubmit="SendAsync" style="width: 100%;">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+                <FluentTextField @bind-Value=_user.FirstName TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.FirstName</FluentTextField>
+                <FluentTextField @bind-Value=_user.LastName TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.Lastname</FluentTextField>
+                <FluentTextField @bind-Value=_user.Email TextFieldType="TextFieldType.Email" Required="true" style="width: 100%;">@i18n.Text.Email</FluentTextField>
+                <FluentTextField @bind-Value=_user.Phone TextFieldType="TextFieldType.Tel" style="width: 100%;">@i18n.Text.Phone</FluentTextField>
+                
+                <FluentCard>
+                    <FluentStack VerticalGap="MainLayout.StackGap" Orientation="Orientation.Vertical">
+                        <FluentLabel>@i18n.Text.Style</FluentLabel>
+
+                        <FluentSlider @bind-Value=_user.Theme.BaseLayerLuminance Style="width: 100%;" Min="0f" Max="1f" Step="0.01f">
+                            <FluentSliderLabel Position="0">@i18n.Text.StyleDark</FluentSliderLabel>
+                            <FluentSliderLabel Position="1">@i18n.Text.StyleLight</FluentSliderLabel>
+                        </FluentSlider>
+                        <br />
+                        <input type="color" style="width: 100%;" @bind="_user.Theme.AccentBaseColor" />
+                    </FluentStack>
+                </FluentCard>
+                
+                <FluentTextArea @bind-Value=_user.Note Label="@i18n.Text.Note" style="width: 100%;" />
+                
+                @if (_create)
+                {
+                    <FluentTextField @bind-Value=_pass1 TextFieldType="TextFieldType.Password" Required="true" style="width: 100%;">@i18n.Text.Password</FluentTextField>
+                    <FluentTextField @bind-Value=_pass2 TextFieldType="TextFieldType.Password" Required="true" style="width: 100%;">@i18n.Text.RepeatPassword</FluentTextField>
+                }
+
+                @if (adminService.IsLogin)
+                {
+                    <FluentCheckbox @bind-Value=_user.IsLock Label="@i18n.Text.IsLocked"></FluentCheckbox>
+                    <FluentCheckbox @bind-Value=_user.IsDeveloper Label="@i18n.Text.IsDeveloper"></FluentCheckbox>
+                }
+                
+                @if (_err is not null)
+                {
+                    <FluentLabel Color="Color.Error">
+                        @_err
+                    </FluentLabel>
+                }
+
+                <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@i18n.Text.Save</FluentButton>
+            </FluentStack>
+        </form>
+
+        @if (_create == false)
+        {
+            <form @onsubmit="SendPasswordAsync" style="width: 100%;">
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+                    <FluentLabel Typo="Typography.Subject">@i18n.Text.ChangePassword</FluentLabel>
+                    <FluentTextField @bind-Value=_pass3 TextFieldType="TextFieldType.Password" Required="true" style="width: 100%;">@i18n.Text.Password</FluentTextField>
+                    <FluentTextField @bind-Value=_pass4 TextFieldType="TextFieldType.Password" Required="true" style="width: 100%;">@i18n.Text.RepeatPassword</FluentTextField>
+
+
+                    @if (_err is not null)
+                    {
+                        <FluentLabel Color="Color.Error">
+                            @_err
+                        </FluentLabel>
+                    }
+
+                    <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@i18n.Text.Login</FluentButton>
+                </FluentStack>
+            </form>
+        }
+    </FluentStack>
+    
+</FluentDialogBody>
+
+@if (_create)
+{
+    <FluentDialogFooter Visible="false">
+    </FluentDialogFooter>
+}
+else
+{
+    <FluentDialogFooter>
+        <FluentButton OnClick="DeleteUserAsync">@i18n.Text.DeleteUser</FluentButton>
+    </FluentDialogFooter>
+}
+
+@code {
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public GrpcService.Core.User Content { get; set; } = default!;
+
+    string? _err;
+    string? _err2;
+    GrpcService.Core.User _user = new() { Theme = new() };
+
+    bool _create = false;
+
+    string _pass1 = "";
+    string _pass2 = "";
+
+    string _pass3 = "";
+    string _pass4 = "";
+    bool _init = false;
+
+    protected override void OnParametersSet()
+    {
+        if (_init == false)
+        {
+            _init = true;
+
+            Dialog.Instance.Parameters.PreventDismissOnOverlayClick = true;
+            _user.MergeFrom(Content);
+            _create = string.IsNullOrEmpty(_user.UserId);
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        _err = null;
+
+        if (_pass1 != _pass2)
+        {
+            _err = i18n.Text.PasswordNotMatch;
+            return;
+        }
+        _user.Password = _pass1;
+
+        string? res = null;
+        await busyDialogService.ShowBusyAsync();
+        try
+        {
+            if (adminService.IsLogin)
+            {
+                if (_create)
+                {
+                    res = await adminService.UserAddAsync(_user);
+                }
+                else
+                {
+                    res = await adminService.UserChangeAsync(_user);
+                }
+            }
+            else if (userService.IsLogin)
+            {
+                res = await userService.UserChangeAsync(_user);
+            }
+            Content.MergeFrom(_user);
+        }
+        catch (Exception ex)
+        {
+            res = ex.Message;
+        }
+        await busyDialogService.CloseBusyAsync();
+
+        if (res is not null)
+        {
+            _err = res;
+        }
+        else
+        {
+            await Dialog.CloseAsync();
+        }
+    }
+
+    private async Task SendPasswordAsync()
+    {
+        if (_pass1 != _pass2)
+        {
+            _err2 = i18n.Text.PasswordNotMatch;
+            return;
+        }
+
+        Content.Password = _pass3;
+        string? res = null;
+        
+        await busyDialogService.ShowBusyAsync();
+        try
+        {
+            if (adminService.IsLogin)
+            {
+                res = await adminService.UserChangePasswordAsync(Content);
+            }
+            else if (userService.IsLogin)
+            {
+                res = await userService.UserChangePasswordAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            res = ex.Message;
+        }
+        await busyDialogService.CloseBusyAsync();
+
+        if (res is not null)
+        {
+            _err2 = res;
+        }
+    }
+
+    private async Task DeleteUserAsync()
+    {
+        var dlgRef = await dlg.ShowConfirmationAsync(i18n.Text.ReallyDelete, i18n.Text.Yes, i18n.Text.No, Content.Email);
+        var dlgRes = await dlgRef.Result;
+        if (dlgRes.Cancelled == false)
+        {
+            string? res = null;
+            await busyDialogService.ShowBusyAsync();
+            try
+            {
+                res = await adminService.UserDeleteAsync(Content);
+            }
+            catch (Exception ex)
+            {
+                res = ex.Message;
+            }
+            await busyDialogService.CloseBusyAsync();
+
+            if (res is not null)
+            {
+                _err = res;
+            }
+            else
+            {
+                await Dialog.CloseAsync();
+            }
+        }
+    }
+}

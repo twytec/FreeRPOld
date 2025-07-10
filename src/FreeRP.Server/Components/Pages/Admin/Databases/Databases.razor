@@ -1,0 +1,55 @@
+﻿@page "/databases"
+@using FreeRP.Database
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<PageTitle>Databases</PageTitle>
+
+@if (auth.IsAdmin)
+{
+    <MudDataGrid T="FrpDatabase" Items="_databases" SortMode="SortMode.Multiple" Filterable="true" ShowMenuIcon="true" Hideable="true">
+        <ToolBarContent>
+            <MudButton OnClick="AddDatabase">@i18n.Text.AddDatabase</MudButton>
+            <MudSpacer />
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.DatabaseId" Title="@i18n.Text.Id" />
+            <PropertyColumn Property="x => x.Name" Title="@i18n.Text.Name" />
+            <PropertyColumn Property="x => x.Description" Title="@i18n.Text.Description" />
+            <TemplateColumn Title="@i18n.Text.Database">
+                <CellTemplate>
+                    @if (context.Item.DatabaseProvider == DatabaseProvider.Sqlite)
+                    {
+                        <span>SQLite</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="@i18n.Text.AccessMode">
+                <CellTemplate>
+                    @if (context.Item.AccessMode == FrpAccessMode.AccessModeRole)
+                    {
+                        @i18n.Text.Role
+                    }
+                    else if (context.Item.AccessMode == FrpAccessMode.AccessModeUser)
+                    {
+                        @i18n.Text.User
+                    }
+                    else if (context.Item.AccessMode == FrpAccessMode.AccessModeCustom)
+                    {
+                        @i18n.Text.Custom
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="#" Filterable="false" Sortable="false" Hideable="false">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" aria-label="@i18n.Text.Edit" OnClick="() => ChangeDatabase(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Lock" aria-label="@i18n.Text.DataAccess" OnClick="() => ChangeAccess(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" aria-label="@i18n.Text.DeleteDatabase" OnClick="() => DeleteDatabase(context.Item)" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}

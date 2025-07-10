@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreeRP.Net.Client.Blazor</title>
+    <base href="/" />
+    <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.ico" />
+    <link href="FreeRP.Net.Client.Blazor.styles.css" rel="stylesheet" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+
+    <script src="js/userLang.js"></script>
+    <script src="js/localStorage.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/clipboard.js"></script>
+
+    <meta name="google" content="notranslate">
+</head>
+
+<body style="margin:0px; padding: 0px; width: 100%; min-height: 100vh; overflow: hidden;">
+    <div id="app">
+        <style>
+            .busy-ring {
+                display: inline-block;
+                width: 80px;
+                height: 80px;
+            }
+
+                .busy-ring:after {
+                    content: " ";
+                    display: block;
+                    width: 64px;
+                    height: 64px;
+                    margin: 8px;
+                    border-radius: 50%;
+                    border: 6px solid dodgerblue;
+                    border-color: dodgerblue transparent dodgerblue transparent;
+                    animation: busy-ring 1.2s linear infinite;
+                }
+
+            @keyframes busy-ring {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+        <div style="display: grid; width: 100%; height: 100vh; background-color: rgba(0, 0, 0, 0);">
+            <div class="busy-ring" style="justify-self: center; align-self: center;"></div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="." class="reload">Reload</a>
+        <span class="dismiss">🗙</span>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+</body>
+
+</html>

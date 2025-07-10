@@ -1,0 +1,38 @@
+﻿@using FreeRP.User
+@inject FreeRP.Localization.FrpLocalizationService i18n
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="Content.Email" InputType="InputType.Email" Label="@i18n.Text.Email"
+                          Required="true" RequiredError="@i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Email)" />
+
+            <MudTextField @bind-Value="Content.Password" InputType="InputType.Password" Label="@i18n.Text.Password"
+                          Required="true" RequiredError="@i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Password)" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="(_isValid == false)" Color="Color.Primary" OnClick="Save">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public FrpUser Content { get; set; } = default!;
+
+    private bool _isValid = false;
+
+    protected override void OnInitialized()
+    {
+        i18n.TextChanged += () => StateHasChanged();
+    }
+
+    private void Save()
+    {
+        Dialog.Close();
+    }
+}

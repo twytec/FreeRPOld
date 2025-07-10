@@ -1,0 +1,12 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+@if (AdminService.IsLogin)
+{
+    <FreeRP.Net.Client.Blazor.Pages.Admin.Admin />
+}
+else if (UserService.IsLogin)
+{
+    
+}

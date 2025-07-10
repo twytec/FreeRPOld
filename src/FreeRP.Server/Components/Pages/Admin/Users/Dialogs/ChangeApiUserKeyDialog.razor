@@ -1,0 +1,45 @@
+﻿@using FreeRP.User
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<MudDialog>
+    <DialogContent>
+        @if (Content is not null)
+        {
+            <MudDatePicker @bind-Date="_date" Label="@i18n.Text.ExpirationDate" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Save">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public FrpUser Content { get; set; } = default!;
+
+    private DateTime? _date;
+
+    void Cancel() => Dialog.Cancel();
+
+    protected override void OnParametersSet()
+    {
+        if (Content is not null)
+        {
+            _date = Content.UtcDateTime.ToDateTime().ToLocalTime();
+        }
+    }
+
+    private void Save()
+    {
+        if (_date is not null)
+            Content.UtcDateTime = FrpUtcDateTime.FromDateTime(_date.Value.ToUniversalTime());
+
+        Dialog.Close();
+    }
+}

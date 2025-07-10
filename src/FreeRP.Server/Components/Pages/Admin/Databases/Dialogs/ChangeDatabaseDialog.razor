@@ -1,0 +1,121 @@
+﻿@using FreeRP.Database
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<MudDialog>
+    <DialogContent>
+        @if (Content is not null)
+        {
+            <div style="display: grid; grid-template-rows: 1fr 60px;">
+                <div style="height: calc(100vh - 70px); overflow-y: auto;">
+                    <MudPaper Class="pa-4" Outlined="true">
+                        <MudForm>
+                            <MudTextField @bind-Value="Content.DatabaseId" InputType="InputType.Text" Label="@i18n.Text.Id" />
+
+                            <MudTextField @bind-Value="Content.Name" InputType="InputType.Text" Label="@i18n.Text.Name" />
+                            <MudTextField @bind-Value="Content.Description" InputType="InputType.Text" Label="@i18n.Text.Description" Lines="3" />
+
+                            <MudSelect T="DatabaseProvider" @bind-Value="Content.DatabaseProvider">
+                                <MudSelectItem Value="DatabaseProvider.Sqlite">SQLite</MudSelectItem>
+                            </MudSelect>
+                            <MudSelect T="FrpAccessMode" @bind-Value="Content.AccessMode">
+                                <MudSelectItem Value="FrpAccessMode.AccessModeRole">@i18n.Text.Role</MudSelectItem>
+                                <MudSelectItem Value="FrpAccessMode.AccessModeUser">@i18n.Text.User</MudSelectItem>
+                                <MudSelectItem Value="FrpAccessMode.AccessModeCustom">@i18n.Text.Custom</MudSelectItem>
+                            </MudSelect>
+
+                            <MudSwitch Class="mt-2" @bind-Value="Content.AllowUnknownData" Label="@i18n.Text.AllowUnknownData" />
+                        </MudForm>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4 mt-4" Outlined="true">
+                        <MudToolBar WrapContent="true">
+                            <MudSelect T="string" Label="@i18n.Text.DataStructure" ValueChanged="DataSetSelectChange" Class="mr-2">
+                                @if (Content.Datasets is not null)
+                                {
+                                    foreach (var item in Content.Datasets)
+                                    {
+                                        <MudSelectItem Value="item.DatasetId">@item.GetName()</MudSelectItem>
+                                    }
+                                }
+                            </MudSelect>
+                            <MudButton Style="align-self: end;" OnClick="AddDataStructure">@i18n.Text.AddDataStructure</MudButton>
+                        </MudToolBar>
+                        @if (_selectedDataStructure is not null)
+                        {
+                            <MudToolBar WrapContent="true">
+                                <MudButton OnClick="ChangeDataStructure">@i18n.Text.ChangeDataStructure</MudButton>
+                                <MudButton OnClick="DeleteDataStructure">@i18n.Text.DeleteDataStructure</MudButton>
+                            </MudToolBar>
+                            <MudDataGrid Elevation="2" Items="_dataFields" SortMode="SortMode.Multiple" Filterable="true" ShowMenuIcon="true" Hideable="true">
+                                <ToolBarContent>
+                                    <MudButton OnClick="AddField">@i18n.Text.AddDataField</MudButton>
+                                    <MudSpacer />
+                                </ToolBarContent>
+                                <Columns>
+                                    <PropertyColumn Property="x => x.Id" Title="@i18n.Text.Name" />
+                                    <TemplateColumn Title="@i18n.Text.PrimaryKey">
+                                        <CellTemplate>
+                                            @if (context.Item.Field.IsPrimaryKey)
+                                            {
+                                                @i18n.Text.Yes
+                                            }
+                                            else
+                                            {
+                                                @i18n.Text.No
+                                            }
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                    <TemplateColumn Title="@i18n.Text.DataType" Filterable="false" Sortable="false" Hideable="false">
+                                        <CellTemplate>
+                                            @if (context.Item.Field.DataType == FrpDatabaseDataType.FieldNull)
+                                            {
+                                                @i18n.Text.DataTypeNull
+                                            }
+                                            else if (context.Item.Field.DataType == FrpDatabaseDataType.FieldString)
+                                            {
+                                                @i18n.Text.DataTypeString
+                                            }
+                                            else if (context.Item.Field.DataType == FrpDatabaseDataType.FieldNumber)
+                                            {
+                                                @i18n.Text.DataTypeNumber
+                                            }
+                                            else if (context.Item.Field.DataType == FrpDatabaseDataType.FieldArray)
+                                            {
+                                                @i18n.Text.DataTypeArray
+                                            }
+                                            else if (context.Item.Field.DataType == FrpDatabaseDataType.FieldBoolean)
+                                            {
+                                                @i18n.Text.DataTypeBoolen
+                                            }
+                                            else if (context.Item.Field.DataType == FrpDatabaseDataType.FieldObject)
+                                            {
+                                                @i18n.Text.DataTypeObject
+                                            }
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                    <PropertyColumn Property="x => x.Field.Description" Title="@i18n.Text.Description" />
+                                    <TemplateColumn Title="#" Filterable="false" Sortable="false" Hideable="false">
+                                        <CellTemplate>
+                                            @if (context.Item.Field.DataType == FrpDatabaseDataType.FieldObject)
+                                            {
+                                                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" aria-label="@i18n.Text.AddDataField" OnClick="() => AddFieldToObject(context.Item)" />
+                                            }
+                                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" aria-label="@i18n.Text.Edit" OnClick="() => ChangeField(context.Item.Field)" />
+                                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" aria-label="@i18n.Text.Delete" OnClick="() => DeleteField(context.Item)" />
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                            </MudDataGrid>
+                        }
+                    </MudPaper>
+                </div>
+                
+                <MudStack Row="true" Spacing="1" Justify="Justify.FlexEnd">
+                    <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="Save">@i18n.Text.Save</MudButton>
+                </MudStack>
+            </div>
+        }
+    </DialogContent>
+</MudDialog>

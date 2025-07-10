@@ -1,0 +1,27 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="Text" InputType="InputType.Text" Label="@Label" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Close">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public string Label { get; set; } = default!;
+
+    [Parameter]
+    public string Text { get; set; } = default!;
+
+    void Cancel() => Dialog.Cancel();
+    void Close() => Dialog.Close(Text);
+}

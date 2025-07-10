@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Content";
+import "core.proto";
+
+package content;
+
+service GrpcContentService {
+
+	// Get directories and files
+	rpc GetContentItems (FrpContentUriRequest) returns (core.FrpResponse);
+
+	// Download ContentItem
+	rpc Download (FrpContentUriRequest) returns (core.FrpResponse);
+
+	// Create directory
+	rpc CreateDirectory (FrpContentUriRequest) returns (core.FrpResponse);
+
+	// Moves the directory to new location if it exists and the user has access
+	rpc MoveDirectory (FrpMoveContentUriRequest) returns (core.FrpResponse);
+
+	// Deletes the directory if it exists and the user has access
+	rpc DeleteDirectory (FrpContentUriRequest) returns (core.FrpResponse);
+
+	// Creates or overwrites a file and open ContentStream with write access if user has access
+	rpc CreateFile (FrpContentUriRequest) returns (FrpContentStream);
+
+	// Write data to the stream
+	rpc FileStreamWrite (FrpContentStream) returns (FrpContentStream);
+
+	// Open ContentStream with read access if it exists and the user has access
+	rpc OpenFileRead (FrpContentUriRequest) returns (FrpContentStream);
+
+	// Read date from the stream
+	rpc FileStreamRead (FrpContentStream) returns (FrpContentStream);
+
+	// Moves the file to new location if it exists and the user has access
+	rpc MoveFileAsync (FrpMoveContentUriRequest) returns (core.FrpResponse);
+
+	// Deletes the file if it exists and the user has access
+	rpc DeleteFile (FrpContentUriRequest) returns (core.FrpResponse);
+}
+
+message FrpContentUriRequest {
+	// Uniform Resource Identifier
+	string uri = 1;
+
+	// Replace if exist
+	bool replace = 3;
+}
+
+//Moves a file or a directory and its contents to a new location.
+message FrpMoveContentUriRequest {
+
+	//The path of the file or directory to move or copy.
+	string source_uri = 1;
+
+	//The path to the new location for sourceDirName or its contents. If sourceDirName is a file, then destDirName must also be a file name.
+	string dest_uri = 2;
+
+	// Replace if exist
+	bool replace = 3;
+
+	// Copy to new location
+	bool copy = 4;
+
+	// Duplicate item
+	bool duplicate = 5;
+}
+
+message FrpContentItems {
+	repeated FrpContentItem items = 2;
+}
+
+message FrpContentItem {
+	// Uniform Resource Identifier
+	string uri = 1;
+
+	// Name of the file or directory
+	string name = 2;
+	
+	// Size of the file in byte
+	uint64 size = 3;
+
+	// File create
+	core.FrpUtcDateTime create = 4;
+
+	// File change
+	core.FrpUtcDateTime change = 5;
+
+	// Is file
+	bool is_file = 6;
+}
+
+message FrpContentStream {
+	string id = 1;
+	core.FrpErrorType error_type = 2;
+	bool e_o_f = 3;
+	bytes data = 4;
+	string message = 5;
+}

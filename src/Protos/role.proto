@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Role";
+import "core.proto";
+import "log.proto";
+
+package role;
+
+service GrpcRoleService {
+
+	//Is role by Id exists
+	rpc IsRoleByIdExists (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Is role by name exists
+	rpc IsRoleByNameExists (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Is user in role
+	rpc IsUserInRole (FrpUserInRole) returns (core.FrpResponse);
+
+	//Get role by id
+	rpc GetRoleById (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Returns FrpRoles
+	rpc GetAllRoles (core.Empty) returns (core.FrpResponse);
+
+	//Returns FrpUserInRoles
+	rpc GetAllUserInRoles (core.Empty) returns (core.FrpResponse);
+
+	//Get user roles
+	rpc GetUserRoles (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Adds the role if it does exists
+	rpc AddRole (FrpRole) returns (core.FrpResponse);
+
+	//Changes the role, if it exists
+	rpc ChangeRole (FrpRole) returns (core.FrpResponse);
+
+	//Delets the role, if it exists
+	rpc DeleteRole (FrpRole) returns (core.FrpResponse);
+
+	//Adds the user to the role if the role and the user exist
+	rpc AddUserToRole (FrpUserInRole) returns (core.FrpResponse);
+
+	//Delets the user from the role if the role and the user exist.
+	rpc DeleteUserFromRole (FrpUserInRole) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetRole (log.FrpLog) returns(core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetUserInRole (log.FrpLog) returns(core.FrpResponse);
+}
+
+message FrpRole {
+	string role_id = 1;
+	string name = 2;
+}
+
+message FrpRoles {
+	repeated FrpRole roles = 1;
+}
+
+message FrpUserInRole {
+	string user_in_role_id = 1;
+	string user_id = 2;
+	string role_id = 3;
+}
+
+message FrpUserInRoles {
+	repeated FrpUserInRole user_in_roles = 1;
+}

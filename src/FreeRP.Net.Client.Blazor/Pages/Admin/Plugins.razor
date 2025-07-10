@@ -1,0 +1,18 @@
+﻿@inject Translation.I18nService i18n
+@inject Client.GrpcServices.AdminService adminService
+@inject IDialogService dlg
+@inject Dialog.BusyDialogService busyDialogService
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap" Style="padding: 4px; height: 100vh; overflow: hidden; align-items: stretch;" Width="100%">
+    <FluentToolbar Style="width: 100%;">
+        <FluentButton>@i18n.Text.AddRole</FluentButton>
+    </FluentToolbar>
+    <FluentListbox TOption="GrpcService.Core.Role"
+                Items="adminService.AdminData.Roles"
+                OptionValue="@(p => p.RoleId)"
+                OptionText="@(p => p.Name)"
+                Multiple="false" Height="100px" Width="100%" />
+
+</FluentStack>
+
+

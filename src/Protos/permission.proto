@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP";
+import "core.proto";
+import "log.proto";
+
+package permission;
+
+service GrpcPermissionService {
+
+	//Returns the permission by Id if exist
+	rpc GetPermissionById (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//returns the user's permission for the URI
+	rpc GetUserContentPermission (core.FrpUri) returns (core.FrpResponse);
+
+	//returns the user's permissions for the database
+	rpc GetUserDatabasePermissions (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Returns the database permissions by database Id if exist
+	rpc GetDatabasePermissions (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Returns the content permissions by URI if exist
+	rpc GetContentPermissions (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Adds the permission if it does not exist
+	rpc AddPermission (FrpPermission) returns (core.FrpResponse);
+
+	//Change the permission if exist
+	rpc ChangePermission (FrpPermission) returns (core.FrpResponse);
+
+	//Delete the permission if exist
+	rpc DeletePermission (FrpPermission) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetPermission (log.FrpLog) returns(core.FrpResponse);
+}
+
+message FrpPermission {
+
+	// Member ID + access URI
+	string member_id_access_uri = 1;
+	
+	//Role id, user id
+	string member_id = 2;
+	MemberIdKind member_id_kind = 3;
+
+	//Access URI. Example: file://foo/bar
+	string access_uri = 4;
+	AccessUriScheme access_uri_scheme = 5;
+
+	FrpPermissionValues permission_values = 6;
+}
+
+enum AccessUriScheme {
+	AccessUriSchemeContent = 0;
+	AccessUriSchemeDatabase = 1;
+	AccessUriSchemePlugin = 2;
+}
+
+enum MemberIdKind {
+	MemberIdKindRole = 0;
+	MemberIdKindUser = 1;
+}
+
+message FrpPermissionValues {
+	FrpPermissionValue read = 1;
+    FrpPermissionValue add = 2;
+    FrpPermissionValue delete = 3;
+    FrpPermissionValue change = 4;
+}
+
+enum FrpPermissionValue {
+	FrpPermissionValueUndefined = 0;
+	FrpPermissionValueDenied = 1;
+	FrpPermissionValueAllow = 2;
+}
+
+message FrpPermissions {
+	repeated FrpPermission permissions = 1;
+}

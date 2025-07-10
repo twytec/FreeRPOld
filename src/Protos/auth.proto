@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Auth";
+import "core.proto";
+import "user.proto";
+import "role.proto";
+import "plugin.proto";
+
+package auth;
+
+service GrpcAuthService {
+
+	//Connect to server
+	rpc Connect (core.FrpStringValueRequest) returns (FrpConnectResponse);
+
+	//Log in to the server with e-mail and password
+	rpc Login (user.FrpUser) returns (FrpLoginResponse);
+
+	//Log in with token
+	rpc LoginWithToken (core.FrpStringValueRequest) returns (FrpLoginResponse);
+
+	//Returns a token
+	rpc GetToken (core.Empty) returns (core.FrpToken);
+
+	//Check connection to the server and user authorisation
+	rpc PingServer (FrpPingData) returns (FrpPingData);
+}
+
+message FrpConnectResponse {
+	bool passwordless = 1;
+	int32 min_password_length = 2;
+	bool use_refresh_token = 3;
+	int32 grpc_message_size_in_byte = 4;
+}
+
+message FrpLoginResponse {
+	user.FrpUser user = 1;
+	repeated role.FrpRole roles = 2;
+	repeated plugin.FrpPlugin plugins = 3;
+	bool is_admin = 4;
+	core.FrpToken token = 5;
+	core.FrpErrorType error_type = 6;
+	string error_message = 7;
+}
+
+message FrpPingData { 
+	string any_data = 1;
+}

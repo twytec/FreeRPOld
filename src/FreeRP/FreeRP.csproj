@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Localization\Lang\de.json" />
+		<EmbeddedResource Include="Localization\Lang\en.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="..\Protos\core.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\log.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\permission.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\role.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\content.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\plugin.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\database.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\databaseaccess.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\user.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\auth.proto" ProtoRoot="..\Protos\" />
+		<Protobuf Include="..\Protos\settings.proto" ProtoRoot="..\Protos\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Google.Protobuf" Version="3.29.1" />
+		<PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
+		<PackageReference Include="Grpc.Net.Client.Web" Version="2.67.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.68.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Protobuf.System.Text.Json" Version="1.3.0" />
+	</ItemGroup>
+
+</Project>

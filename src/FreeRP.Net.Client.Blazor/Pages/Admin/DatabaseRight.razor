@@ -1,0 +1,114 @@
+﻿<FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap" Style="padding: 4px; height: 100vh; overflow: hidden;" Width="100%">
+    <FluentToolbar Style="width: 100%;">
+        <FluentButton OnClick="Save">@I18n.Text.Save</FluentButton>
+    </FluentToolbar>
+    <div style="width: 100%;">
+        <FluentCombobox Label="@I18n.Text.Role"
+                        Placeholder="@I18n.Text.PleaseSelect"
+                        TOption="GrpcService.Core.Role"
+                        Items="AdminService.AdminData.Roles"
+                        OptionValue="@(p => p.RoleId)"
+                        OptionText="@(p => p.Name)"
+                        Multiple="false" Width="100%" SelectedOptionChanged="SelectRole" @bind-Value="_selectRoleValue" />
+    </div>
+    
+    @if (_role is not null)
+    {
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            <FluentCombobox Label="@I18n.Text.Database"
+                            Placeholder="@I18n.Text.PleaseSelect"
+                            TOption="GrpcService.Database.Database"
+                            Items="AdminService.AdminData.Databases"
+                            OptionValue="@(p => p.DatabaseId)"
+                            OptionText="@(p => p.Name)"
+                            Multiple="false" Width="100%" SelectedOptionChanged="SelectDatabase" @bind-Value="_selectDatabaseValue" />
+            @if (_database is not null)
+            {
+                <FluentStack VerticalGap="MainLayout.StackGap">
+                    <FluentSwitch Label="@I18n.Text.Read" Value="_database.Read" ValueChanged="DatabaseRightReadClick" />
+                    <FluentSwitch Label="@I18n.Text.Create" Value="_database.Create" ValueChanged="DatabaseRightCreateClick" />
+                    <FluentSwitch Label="@I18n.Text.Change" Value="_database.Change" ValueChanged="DatabaseRightChangeClick" />
+                    <FluentSwitch Label="@I18n.Text.Delete" Value="_database.Delete" ValueChanged="DatabaseRightDeleteClick" />
+                </FluentStack>
+            }
+        </FluentStack>
+    }
+    
+    @if (_database is not null)
+    {
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            <FluentCombobox Label="@I18n.Text.Table"
+                            Placeholder="@I18n.Text.PleaseSelect"
+                            TOption="GrpcService.Database.DatabaseTable"
+                            Items="_database.Tables"
+                            OptionValue="@(p => p.TableId.ToString())"
+                            OptionText="@(p => p.Name)"
+                            Multiple="false" Width="100%" SelectedOptionChanged="SelectTable" @bind-Value="_selectTableValue" />
+            @if (_databaseTable is not null)
+            {
+                <FluentStack VerticalGap="MainLayout.StackGap">
+                    <FluentSwitch Label="@I18n.Text.Read" Value="_databaseTable.Read" ValueChanged="DatabaseTableRightReadClick" />
+                    <FluentSwitch Label="@I18n.Text.Create" Value="_databaseTable.Create" ValueChanged="DatabaseTableRightCreateClick" />
+                    <FluentSwitch Label="@I18n.Text.Change" Value="_databaseTable.Change" ValueChanged="DatabaseTableRightChangeClick" />
+                    <FluentSwitch Label="@I18n.Text.Delete" Value="_databaseTable.Delete" ValueChanged="DatabaseTableRightDeleteClick" />
+                </FluentStack>
+            }
+        </FluentStack>
+    }
+
+    @if (_fields is not null)
+    {
+        <FluentDataGrid Items="_fields" ResizableColumns="true" Virtualize="true" Style="width: 100%;">
+            <PropertyColumn Property="@(p => p.Name)" Title="@I18n.Text.Name" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Description)" Title="@I18n.Text.Description" Sortable="true" />
+            <TemplateColumn Title="@I18n.Text.DataType" Sortable="true" SortBy="_dataTypeSort">
+                <FluentLabel>
+                    @switch (context.DataType)
+                    {
+                        case GrpcService.Database.DatabaseTableDataType.FieldString:
+                            @I18n.Text.DataTypeString
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldNumber:
+                            @I18n.Text.DataTypeNumber
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldArray:
+                            @I18n.Text.DataTypeArray
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldBoolean:
+                            @I18n.Text.DataTypeBoolen
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldObject:
+                            @I18n.Text.DataTypeObject
+                            break;
+                        default:
+                            @I18n.Text.DataTypeNull
+                            break;
+                    }
+                </FluentLabel>
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.IsId">
+                @if (context.IsId)
+                {
+                    <FluentLabel>@I18n.Text.Yes</FluentLabel>
+                }
+                else
+                {
+                    <FluentLabel>@I18n.Text.No</FluentLabel>
+                }
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.Read">
+                <FluentSwitch Value="context.Read" ValueChanged="((val) => DatabaseTableFieldRightReadClick(context, val))" />
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.Create">
+                <FluentSwitch Value="context.Create" ValueChanged="((val) => DatabaseTableFieldRightCreateClick(context, val))" />
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.Change">
+                <FluentSwitch Value="context.Change" ValueChanged="((val) => DatabaseTableFieldRightChangeClick(context, val))" />
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.Delete">
+                <FluentSwitch Value="context.Delete" ValueChanged="((val) => DatabaseTableFieldRightDeleteClick(context, val))" />
+            </TemplateColumn>
+        </FluentDataGrid>
+    }
+</FluentStack>
+

@@ -1,0 +1,108 @@
+﻿@using FreeRP.Content
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Settings.FrpSettings settings
+
+<MudDialog>
+    <DialogContent>
+        <InputFile OnChange="LoadFiles" style="margin-bottom: 20px;" />
+        @if (_err is not null)
+        {
+            <MudText Color="Color.Error">@_err</MudText>
+        }
+
+        <MudOverlay @bind-Visible="_isLoaded" DarkBackground="true" AutoClose="false" ZIndex="9999">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="2">
+                <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                <MudText Color="Color.Success">@_loaded</MudText>
+            </MudStack>
+        </MudOverlay>
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public string Uri { get; set; } = default!;
+
+    bool _isLoaded = false;
+    long _loaded = 0;
+    string? _err;
+
+    protected override void OnParametersSet()
+    {
+        Dialog.SetOptions(new() { CloseButton = true });
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _err = null;
+        _isLoaded = true;
+        StateHasChanged();
+
+        try
+        {
+            FrpContentUriRequest request = new() { Uri = Uri + e.File.Name };
+            var res = await ds.FrpContentService.CreateFileAsync(request, auth.FrpAuthService);
+            if (res.ErrorType == FrpErrorType.ErrorNone)
+            {
+                var stream = e.File.OpenReadStream(long.MaxValue);
+
+                int size = settings.GrpcSettings.GrpcMessageSizeInByte - 256;
+                byte[] buffer = new byte[size];
+
+                while (true)
+                {
+                    var count = await stream.ReadAsync(buffer, 0, size);
+                    if (count > 0)
+                        res.Data = Google.Protobuf.ByteString.CopyFrom(buffer, 0, count);
+                    else
+                        res.EOF = true;
+
+                    res = await ds.FrpContentService.FileStreamWriteAsync(res);
+
+                    if (res.ErrorType == FrpErrorType.ErrorNone)
+                    {
+                        if (res.EOF)
+                            break;
+                        else
+                        {
+                            _loaded += count;
+                            StateHasChanged();
+                        }
+                    }
+                    else
+                    {
+                        _isLoaded = false;
+                        if (res.ErrorType == FrpErrorType.ErrorFileNotExist)
+                            _err = i18n.Text.ErrorFileNotExist;
+                        else if (string.IsNullOrEmpty(res.Message))
+                            _err = i18n.Text.ErrorUnknown;
+                        else
+                            _err = res.Message;
+
+                        break;
+                    }
+                }
+
+                await stream.DisposeAsync();
+                Dialog.Close();
+            }
+            else
+            {
+                _err = res.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _err = ex.Message;
+        }
+
+        _isLoaded = false;
+    }
+}

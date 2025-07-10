@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP";
+import "google/protobuf/any.proto";
+
+package core;
+
+//Null object
+message Empty {}
+
+message FrpStringValueRequest {
+	string val = 1;
+}
+
+//Default response
+message FrpResponse
+{
+	// Error
+	FrpErrorType error_type = 1;
+
+	// Error message
+	string message = 2;
+
+	// Data as JSON or any
+	string data = 3;
+
+	//Any protobuf data
+	google.protobuf.Any any_data = 4;
+
+	bool bool_value = 5;
+}
+
+//Default error types
+enum FrpErrorType
+{
+	ErrorNone = 0;
+	ErrorUnknown = 1;
+	ErrorAccessDenied = 2;
+	ErrorEmailInvalid = 3;
+	ErrorPathExist = 4;
+	ErrorPathNotExist = 5;
+	ErrorNotFound = 6;
+	ErrorNoConnectToServer = 7;
+
+	ErrorPasswordToShort = 20;
+	ErrorPasswordNumber = 21;
+	ErrorPasswordUpperChar = 22;
+	ErrorPasswordLowerChar = 23;
+	ErrorPasswordSymbols = 24;
+	ErrorPasswordlessMail = 30;
+
+	ErrorUserExist = 40;
+	ErrorUserNotExist = 41;
+
+	ErrorRoleExist = 60;
+	ErrorRoleNotExist = 61;
+	ErrorRoleNameRequired = 62;
+
+	ErrorProjectExist = 80;
+	ErrorProjectNotExist = 81;
+	ErrorProjectRoleExist = 82;
+	ErrorProjectNotRoleExist = 83;
+	ErrorProjectNameRequired = 84;
+
+	ErrorDatabaseOnlyUserAccess = 100;
+	ErrorDatabaseOnlyRoleAccess = 101;
+	ErrorDatabaseOnlyProjectAccess = 102;
+	ErrorDatabaseExist = 103;
+	ErrorDatabaseNotExist = 104;
+	ErrorDatabaseIdRequired = 105;
+	ErrorDatabaseIsNotOpen = 106;
+	ErrorDatabaseNotAllowedUnkownData = 107;
+
+	ErrorDatasetExist = 120;
+	ErrorDatasetNotExist = 121;
+	ErrorDatasetIdRequired = 122;
+	ErrorDatasetPrimaryKeyRequired = 123;
+	ErrorDatasetDataInvalid = 124;
+	
+	ErrorFieldExist = 140;
+	ErrorFieldNotExist = 141;
+	ErrorFieldIdRequired = 142;
+
+	ErrorUriSchemeNotSupported = 160;
+	ErrorUriSchemeFileRequired = 161;
+	ErrorUriSchemeDatabaseRequired = 162;
+
+	ErrorFileExist = 180;
+	ErrorFileNotExist = 181;
+
+	ErrorDirectoryExist = 200;
+	ErrorDirectoryNotExist = 201;
+
+	ErrorAccessConflict = 220;
+	ErrorAccessExist = 221;
+	ErrorAccessNotExist = 222;
+
+	ErrorPluginExist = 240;
+	ErrorPluginNotExist = 241;
+}
+
+message FrpUtcDateTime {
+  //Year of date.
+  int32 year = 1;
+
+  // Month of year. Must be from 1 to 12.
+  int32 month = 2;
+
+  // Day of month. Must be from 1 to 31 and valid for the year and month.
+  int32 day = 3;
+
+  // Hours of day in 24 hour format.
+  int32 hours = 4;
+
+  // Minutes of hour of day. Must be from 0 to 59.
+  int32 minutes = 5;
+
+  // Seconds of minutes of the time. Must normally be from 0 to 59.
+  int32 seconds = 6;
+
+  // Unix timestamp
+  int64 unix_time_seconds = 7;
+}
+
+message FrpToken {
+	string token = 1;
+	FrpUtcDateTime expiration_date = 2;
+}
+
+message FrpUri {
+	string uri = 1;
+	FrpUriScheme scheme = 2;
+}
+
+enum FrpUriScheme {
+	FrpUriSchemeFile = 0;
+	FrpUriSchemeDatabase = 1;
+	FrpUriSchemePlugin = 2;
+}

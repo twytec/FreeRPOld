@@ -1,0 +1,79 @@
+﻿@inject Translation.I18nService i18n
+@inject Dialog.BusyDialogService busy
+@inject Client.GrpcServices.AdminService adminService
+@inject NavigationManager nm
+
+<FluentStack Orientation="Orientation.Horizontal" Width="100%">
+    <div>
+        <FluentNavMenu @bind-Expanded="@Expanded" Width="250" Collapsible="true" Title="@i18n.Text.Menu">
+            <FluentNavLink OnClick="(() => _activeView = UsersView)" Icon="@(new Icons.Regular.Size24.NotepadPerson())">@i18n.Text.User</FluentNavLink>
+            <FluentNavLink OnClick="(() => _activeView = RoleView)" Icon="@(new Icons.Regular.Size24.Group())">@i18n.Text.Role</FluentNavLink>
+            <FluentNavLink OnClick="(() => _activeView = DatabaseView)" Icon="@(new Icons.Regular.Size24.Database())">@i18n.Text.Database</FluentNavLink>
+            <FluentNavLink OnClick="(() => _activeView = DatabaseRightView)" Icon="@(new Icons.Regular.Size24.DatabasePerson())">@i18n.Text.DatabaseRights</FluentNavLink>
+            <FluentNavLink OnClick="(() => _activeView = PluginView)" Icon="@(new Icons.Regular.Size24.AppsAddIn())">@i18n.Text.Plugin</FluentNavLink>
+            <FluentNavLink OnClick="ReloadData" Icon="@(new Icons.Regular.Size24.ArrowClockwise())">@i18n.Text.ReloadData</FluentNavLink>
+            <FluentNavLink OnClick="Logout" Icon="@(new Icons.Regular.Size24.PersonArrowBack())">@i18n.Text.Logout</FluentNavLink>
+        </FluentNavMenu>
+    </div>
+    <div style="width: 100%; height: 100vh; overflow-y: auto;">
+        <div style="display: @_userViewState;">
+            <Users />
+        </div>
+        <div style="display: @_roleViewState;">
+            <Roles />
+        </div>
+        <div style="display: @_databaseViewState;">
+            <Databases />
+        </div>
+        <div style="display: @_databaseRightViewState;">
+            <DatabaseRight />
+        </div>
+        <div style="display: @_pluginViewState;">
+            <Plugins />
+        </div>
+    </div>
+</FluentStack>
+
+@code {
+    bool Expanded = false;
+
+    const string UsersView = "users";
+    const string RoleView = "role";
+    const string DatabaseView = "database";
+    const string DatabaseRightView = "databaseRight";
+    const string PluginView = "plugin";
+    const string StoreView = "store";
+
+    string _activeView = "";
+    string _userViewState => _activeView == UsersView ? "block" : "none";
+    string _roleViewState => _activeView == RoleView ? "block" : "none";
+    string _databaseViewState => _activeView == DatabaseView ? "block" : "none";
+    string _databaseRightViewState => _activeView == DatabaseRightView ? "block" : "none";
+    string _pluginViewState => _activeView == PluginView ? "block" : "none";
+    string _storeViewState => _activeView == StoreView ? "block" : "none";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await busy.ShowBusyAsync(i18n.Text.Loading);
+            await adminService.LoadDataAsync();
+            await busy.CloseBusyAsync();
+
+            _activeView = UsersView;
+            StateHasChanged();
+        }
+    }
+
+    public async void ReloadData()
+    {
+        await busy.ShowBusyAsync(i18n.Text.Loading);
+        await adminService.LoadDataAsync();
+        await busy.CloseBusyAsync();
+    }
+
+    public void Logout()
+    {
+        nm.NavigateTo("/");
+    }
+}

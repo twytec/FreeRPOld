@@ -1,0 +1,97 @@
+﻿@page "/contents"
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject IJSRuntime js
+
+@if (auth.IsAdmin)
+{
+    if (_tree is not null)
+    {
+        <MudPaper>
+            <MudToolBar Dense="true" WrapContent="true">
+                <MudMenu title="@i18n.Text.Detail" Icon="@Icons.Material.Filled.Pageview">
+                    <MudMenuItem OnClick="ShowNameOnly">@i18n.Text.Name</MudMenuItem>
+                    <MudMenuItem OnClick="ShowDetail">@i18n.Text.Detail</MudMenuItem>
+                </MudMenu>
+                <MudDivider FlexItem="true" Vertical="true" />
+                <MudIconButton OnClick="CreateDirectory" Icon="@Icons.Material.Filled.CreateNewFolder" title="@i18n.Text.DirectoryCreate" aria-label="@i18n.Text.DirectoryCreate" />
+                <MudIconButton OnClick="AddFile" Icon="@Icons.Material.Filled.UploadFile" title="@i18n.Text.FileUpload" aria-label="@i18n.Text.FileUpload" />
+                <MudIconButton OnClick="(() => ContentPermission(_selectedUri))" Icon="@Icons.Material.Filled.Lock" title="@i18n.Text.Permissions" aria-label="@i18n.Text.Permissions" />
+                @if (_copyCutContentItem is not null)
+                {
+                    <MudIconButton OnClick="Paste" Icon="@Icons.Material.Filled.ContentPaste" title="@i18n.Text.Paste" aria-label="@i18n.Text.Paste" />
+                }
+            </MudToolBar>
+        </MudPaper>
+        
+        @if (_tree is not null)
+        {
+            <MudDataGrid @ref="_grid" Class="mt-2" T="FreeRP.Content.FrpContentItem" Items="_tree.Items"
+                         Virtualize="true" FixedHeader="true" SortMode="SortMode.Single" Filterable="true" Hideable="true">
+                <Columns>
+                    <TemplateColumn HeaderStyle="width: 40px" Sortable="false">
+                        <CellTemplate>
+                            @if (context.Item.Name != "...")
+                            {
+                                <MudMenu Size="Size.Small" Icon="@Icons.Material.Outlined.MoreVert" aria-label="@i18n.Text.Detail" title="@i18n.Text.Detail">
+                                    <MudMenuItem OnClick="(() => Download(context.Item))">@i18n.Text.Download</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => Change(context.Item))">@i18n.Text.Change</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => Duplicate(context.Item))">@i18n.Text.Duplicate</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => Copy(context.Item))">@i18n.Text.Copy</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => Cut(context.Item))">@i18n.Text.Cut</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => Delete(context.Item))">@i18n.Text.Delete</MudMenuItem>
+                                    <MudMenuItem OnClick="(() => ContentPermission(context.Item.Uri))">@i18n.Text.Permissions</MudMenuItem>
+                                </MudMenu>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn SortBy="x => x.Name" Title="@i18n.Text.Name">
+                        <CellTemplate>
+                            @if (context.Item.IsFile)
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="(() => OpenContentItem(context.Item))"
+                                           StartIcon="@Icons.Material.Filled.InsertDriveFile" FullWidth="true" Style="text-transform:none; justify-content: start;">
+                                    @context.Item.Name
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="(() => OpenContentItem(context.Item))"
+                                           StartIcon="@Icons.Material.Filled.Folder" FullWidth="true" Style="text-transform:none; justify-content: start;">
+                                    @context.Item.Name
+                                </MudButton>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn SortBy="x => x.Create.UnixTimeSeconds" Title="@i18n.Text.Create" Hidden="_hideDetail">
+                        <CellTemplate>
+                            @if (context.Item.Create is not null)
+                            {
+                                @context.Item.Create.ToDateTime().ToLocalTime().ToString()
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn SortBy="x => x.Change.UnixTimeSeconds" Title="@i18n.Text.Changed" Hidden="_hideDetail">
+                        <CellTemplate>
+                            @if (context.Item.Change is not null)
+                            {
+                                @context.Item.Change.ToDateTime().ToLocalTime().ToString()
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn SortBy="x => x.Size" Title="@i18n.Text.FileSize" Hidden="_hideDetail">
+                        <CellTemplate>
+                            @if (context.Item.Size > 0)
+                            {
+                                @Helpers.FileSystem.SizeToString(context.Item.Size)
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        }
+    }
+}

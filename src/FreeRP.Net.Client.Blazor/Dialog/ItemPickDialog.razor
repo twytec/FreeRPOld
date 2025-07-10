@@ -1,0 +1,35 @@
+﻿@implements IDialogContentComponent<IEnumerable<Data.PickItem>>
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">
+        @Dialog.Instance.Parameters.Title
+    </FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <FluentListbox 
+        TOption="Data.PickItem" 
+        Items="Content"
+        OptionValue="@(p => p.Key)"
+        OptionText="@(p => p.Value)"
+        SelectedOptionChanged="Save"/>
+</FluentDialogBody>
+
+<FluentDialogFooter Visible="false">
+
+</FluentDialogFooter>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<Data.PickItem> Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private async void Save(Data.PickItem val)
+    {
+        await Dialog.CloseAsync(val);
+    }
+
+}

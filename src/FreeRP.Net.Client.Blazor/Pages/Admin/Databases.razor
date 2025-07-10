@@ -1,0 +1,87 @@
+﻿<FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap" Style="padding: 4px; height: 100vh; overflow: hidden;" Width="100%">
+    <FluentToolbar Style="width: 100%;">
+        <FluentButton OnClick="AddDatabase">@I18n.Text.AddDatabase</FluentButton>
+        @if (_database is not null)
+        {
+            <FluentButton OnClick="ChangeDatabase">@I18n.Text.ChangeDatabase</FluentButton>
+            <FluentButton OnClick="AddTable">@I18n.Text.AddTable</FluentButton>
+
+            @if (_databaseTable is not null)
+            {
+                <FluentButton OnClick="ChangeTable">@I18n.Text.ChangeTable</FluentButton>
+                <FluentButton OnClick="AddField">@I18n.Text.AddTableField</FluentButton>
+            }
+        }
+    </FluentToolbar>
+    <div style="width: 100%;">
+        <FluentCombobox Label="@I18n.Text.Database"
+                        Placeholder="@I18n.Text.PleaseSelect"
+                        TOption="GrpcService.Database.Database"
+                        Items="AdminService.AdminData.Databases"
+                        OptionValue="@(p => p.DatabaseId)"
+                        OptionText="@(p => p.Name)"
+                        Multiple="false" Width="100%" SelectedOptionChanged="SelectDatabase" />
+    </div>
+    
+
+    @if (_database is not null)
+    {
+        <div style="width: 100%;">
+            <FluentCombobox Label="@I18n.Text.Table"
+                            Placeholder="@I18n.Text.PleaseSelect"
+                            TOption="GrpcService.Database.DatabaseTable"
+                            Items="_database.Tables"
+                            OptionValue="@(p => p.TableId.ToString())"
+                            OptionText="@(p => p.Name)"
+                            Multiple="false" Width="100%" SelectedOptionChanged="SelectTable" />
+        </div>
+        
+    }
+
+    @if (_fields is not null)
+    {
+        <FluentDataGrid Items="_fields" ResizableColumns="true" Virtualize="true" Style="width: 100%;">
+            <PropertyColumn Property="@(p => p.Name)" Title="@I18n.Text.Name" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Description)" Title="@I18n.Text.Description" Sortable="true" />
+            <TemplateColumn Title="@I18n.Text.DataType" Sortable="true" SortBy="_dataTypeSort">
+                <FluentLabel>
+                    @switch (context.DataType)
+                    {
+                        case GrpcService.Database.DatabaseTableDataType.FieldString:
+                            @I18n.Text.DataTypeString
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldNumber:
+                            @I18n.Text.DataTypeNumber
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldArray:
+                            @I18n.Text.DataTypeArray
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldBoolean:
+                            @I18n.Text.DataTypeBoolen
+                            break;
+                        case GrpcService.Database.DatabaseTableDataType.FieldObject:
+                            @I18n.Text.DataTypeObject
+                            break;
+                        default:
+                            @I18n.Text.DataTypeNull
+                            break;
+                    }
+                </FluentLabel>
+            </TemplateColumn>
+            <TemplateColumn Title="@I18n.Text.IsId">
+                @if (context.IsId)
+                {
+                    <FluentLabel>@I18n.Text.Yes</FluentLabel>
+                }
+                else
+                {
+                    <FluentLabel>@I18n.Text.No</FluentLabel>
+                }
+            </TemplateColumn>
+            <TemplateColumn Title="#">
+                <FluentButton OnClick="(() => ChangeField(context))">@I18n.Text.Edit</FluentButton>
+            </TemplateColumn>
+        </FluentDataGrid>
+    }
+</FluentStack>
+

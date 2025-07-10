@@ -1,0 +1,49 @@
+﻿@page "/roles"
+@using FreeRP.User
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+@if (auth.IsAdmin)
+{
+    <MudPaper>
+        <MudToolBar WrapContent="true" >
+            <MudSelect T="string" Label="@i18n.Text.Role" ValueChanged="RoleSelectChangeAsync" Class="mr-2">
+                @if (_roles is not null)
+                {
+                    foreach (var item in _roles)
+                    {
+                        <MudSelectItem Value="item.RoleId">@item.Name</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+            <MudButton Style="align-self: end;" OnClick="AddRole">@i18n.Text.AddRole</MudButton>
+        </MudToolBar>
+    </MudPaper>
+
+    <MudDivider />
+
+    @if (_selectedRole is not null)
+    {
+        <MudDataGrid T="FrpUser" Items="_userInRole" SortMode="SortMode.Single" Filterable="true" ShowMenuIcon="true" Hideable="true">
+            <ToolBarContent>
+                <MudButton OnClick="EditRole">@i18n.Text.ChangeRole</MudButton>
+                <MudButton OnClick="DeleteRole">@i18n.Text.DeleteRole</MudButton>
+                <MudButton OnClick="AddUserToRole">@i18n.Text.UserAdd</MudButton>
+                <MudSpacer />
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x.Email" Title="@i18n.Text.Email" />
+                <PropertyColumn Property="x => x.FirstName" Title="@i18n.Text.FirstName" />
+                <PropertyColumn Property="x => x.LastName" Title="@i18n.Text.Lastname" />
+                <TemplateColumn Filterable="false" Sortable="false" Hideable="false">
+                    <CellTemplate>
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" aria-label="@i18n.Text.UserAdd" OnClick="() => DeleteUserFromRole(context.Item)" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+}

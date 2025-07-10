@@ -1,0 +1,86 @@
+{
+  "serverName": "myFreeRP",
+  "staticPaths": false,
+  "admin": {
+    "userId": "0",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "email": "Admin",
+    "password": "",
+    "note": "",
+    "isLock": false,
+    "utcDateTime": null,
+    "language": "en",
+    "theme": {
+      "darkMode": true,
+      "rightToLeft": false
+    },
+    "isApi": false
+  },
+  "system": {
+    "userId": "-1",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "email": "System",
+    "password": "",
+    "note": "",
+    "isLock": false,
+    "utcDateTime": null,
+    "language": "en",
+    "theme": {
+      "darkMode": true,
+      "rightToLeft": false
+    },
+    "isApi": false
+  },
+  "contentSettings": {
+    "tempRootPath": "",
+    "contentRootPath": "",
+    "binRootPath": ""
+  },
+  "databaseSettings": {
+    "databaseRootPath": "",
+    "databaseId": "freeRPDataDb",
+    "databaseProvider": 0
+  },
+  "logSettings": {
+    "logRootPath": "",
+    "databaseId": "freeRPLogDb",
+    "databaseProvider": 0,
+    "logRecordTypes": [
+      "FrpAuth",
+      "FrpConnect",
+      "FrpContent",
+      "FrpDatabaseAccess",
+      "FrpDatabases",
+      "FrpPermissions",
+      "FrpRole",
+      "FrpUserInRole",
+      "FrpUser"
+    ],
+    "logAll": true
+  },
+  "loginSettings": {
+    "passwordless": false,
+    "minPasswordLength": 8,
+    "passwordSigningKey": "678b1096a8ca445a82b51bdffe166717",
+    "tokenSigningKey": "94e79689c5cc4034b0dd31168bb7094c",
+    "useRefreshToken": true,
+    "tokenValidityInHours": 24,
+    "shortTimeTokenValidityInMinutes": 3
+  },
+  "grpcSettings": {
+    "grpcMessageSizeInByte": 4194304,
+    "grpcTransportTimeoutInMinutes": 5
+  },
+  "smtpSettings": {
+    "eMail": "",
+    "host": "",
+    "port": 0,
+    "username": "",
+    "password": "",
+    "ssl": false
+  }
+}

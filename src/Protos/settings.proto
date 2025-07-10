@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Settings";
+import "core.proto";
+import "database.proto";
+import "user.proto";
+
+package settings;
+
+service GrpcSettingService {
+	//Add log
+	rpc GetSettings (core.Empty) returns (core.FrpResponse);
+}
+
+message FrpSettings {
+
+	// The name of this server
+	string server_name = 1;
+
+	// Should the paths to the directories be static? 
+	// With Flase, all paths are set when the application is started.
+	bool static_paths = 2;
+
+	// Default admin user
+	user.FrpUser admin = 3;
+
+	// Default system user
+	user.FrpUser system = 4;
+
+	// Content settings
+	FrpContentSettings content_settings = 5;
+
+	// Database settings
+	FrpDatabaseSettings database_settings = 6;
+
+	// Log settings
+	FrpLogSettings log_settings = 7;
+
+	// Login settings
+	FrpLoginSettings login_settings = 8;
+
+	// Grpc settings
+	FrpGrpcSettings grpc_settings = 9;
+
+	// Smtp settings
+	FrpSmtpSettings smtp_settings = 10; 
+}
+
+message FrpContentSettings {
+	string temp_root_path = 1;
+	string content_root_path = 2;
+	string bin_root_path = 3;
+}
+
+message FrpDatabaseSettings {
+	string database_root_path = 1;
+	string database_id = 2;
+	database.DatabaseProvider database_provider = 3;
+}
+
+message FrpLogSettings {
+	string log_root_path = 1;
+	string database_id = 2;
+	database.DatabaseProvider database_provider = 3;
+	repeated string log_record_types = 4;
+	bool log_all = 5;
+}
+
+message FrpLoginSettings {
+	bool passwordless = 1;
+	int32 min_password_length = 2;
+	string password_signing_key = 3;
+	string token_signing_key = 4;
+	bool use_refresh_token = 5;
+	int32 token_validity_in_hours = 6;
+	int32 short_time_token_validity_in_minutes = 7;
+}
+
+message FrpGrpcSettings {
+	int32 grpc_message_size_in_byte = 1;
+	int32 grpc_transport_timeout_in_minutes = 2;
+}
+
+message FrpSmtpSettings {
+	string e_mail = 1;
+	string host = 2;
+	int32 port = 3;
+	string username = 4;
+	string password = 5;
+	bool ssl = 6;
+}

@@ -1,0 +1,181 @@
+﻿@page "/users"
+@using FreeRP.User
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<PageTitle>Home</PageTitle>
+
+@if (auth.IsAdmin)
+{
+    <MudDataGrid T="FrpUser" Items="_users" SortMode="SortMode.Multiple" Filterable="true" ShowMenuIcon="true" Hideable="true">
+        <ToolBarContent>
+            <MudButton OnClick="AddUser">@i18n.Text.UserAdd</MudButton>
+            <MudSpacer />
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Email" Title="@i18n.Text.Email" />
+            <PropertyColumn Property="x => x.FirstName" Title="@i18n.Text.FirstName" />
+            <PropertyColumn Property="x => x.LastName" Title="@i18n.Text.Lastname" />
+            <TemplateColumn Title="@i18n.Text.IsLocked" SortBy="x => x.IsLock">
+                <CellTemplate>
+                    @if (context.Item.IsLock)
+                    {
+                        @i18n.Text.Yes
+                    }
+                    else
+                    {
+                        @i18n.Text.No
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Filterable="false" Sortable="false" Hideable="false">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" aria-label="@i18n.Text.Edit" title="@i18n.Text.Edit" OnClick="() => ChangeUser(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Password" aria-label="@i18n.Text.ChangePassword" title="@i18n.Text.ChangePassword" OnClick="() => ChangeUserPassword(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" aria-label="@i18n.Text.UserDelete" title="@i18n.Text.UserDelete" OnClick="() => DeleteUser(context.Item)" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+@code {
+    private IEnumerable<FrpUser>? _users;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            auth.OnLogin += async (s, e) => await LoginChangeAsync();
+            await LoginChangeAsync();
+        }
+    }
+
+    private async Task LoginChangeAsync()
+    {
+        if (auth.IsAdmin)
+        {
+            await LoadUsersAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        _users = await ds.FrpUserService.GetUsersAsync();
+    }
+
+    private async Task AddUser()
+    {
+        FrpUser user = new() { Language = i18n.CurrentLanguage, Theme = new() };
+
+        var para = new DialogParameters<Dialogs.ChangeUserDialog>();
+        para.Add(x => x.Content, user);
+        para.Add(x => x.NewUser, true);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeUserDialog>(i18n.Text.UserAdd, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                var r = await ds.FrpUserService.AddUserAsync(user, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+
+
+    }
+
+    private async Task ChangeUser(FrpUser u)
+    {
+        var user = u.Clone();
+        var para = new DialogParameters<Dialogs.ChangeUserDialog>();
+        para.Add(x => x.Content, user);
+        para.Add(x => x.IsAdmin, true);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeUserDialog>(i18n.Text.UserChange, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                u.MergeFrom(user);
+                var r = await ds.FrpUserService.ChangeUserAsync(u, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+    }
+
+    private async Task ChangeUserPassword(FrpUser u)
+    {
+        var user = u.Clone();
+        var para = new DialogParameters<Dialogs.ChangeUserPasswordDialog>();
+        para.Add(x => x.Content, user);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeUserPasswordDialog>(i18n.Text.ChangePassword, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                u.MergeFrom(user);
+                var r = await ds.FrpUserService.ChangeUserPasswordAsync(u, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+    }
+
+    private async Task DeleteUser(FrpUser u)
+    {
+        var yes = await dlg.ShowMessageBox(u.Email, i18n.Text.ReallyDelete, i18n.Text.Yes, i18n.Text.No);
+        if (yes == true)
+        {
+            var res = await ds.FrpUserService.DeleteUserAsync(u, auth.FrpAuthService);
+            if (res.ErrorType == FrpErrorType.ErrorNone)
+            {
+                await LoadUsersAsync();
+            }
+            else
+            {
+                await dlg.ShowMessageBox(i18n.Text.Error, res.Message, i18n.Text.Ok);
+            }
+        }
+    }
+}

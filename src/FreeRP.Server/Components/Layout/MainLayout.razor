@@ -1,0 +1,16 @@
+﻿@inherits LayoutComponentBase
+
+
+<div style="display: grid; grid-template-columns: 56px 1fr; height: 100vh; width: 100%;">
+    <div style="width: 56px; display: block;">
+        <NavMenu />
+    </div>
+    <div class="pa-1" style="height: 100vh; overflow-y: auto;">
+        @Body
+    </div>
+</div>
+
+<MudPopoverProvider @rendermode="RenderMode.InteractiveServer" />
+<MudDialogProvider @rendermode="RenderMode.InteractiveServer" BackdropClick="false" FullWidth="true" MaxWidth="MaxWidth.Medium" />
+<MudSnackbarProvider @rendermode="RenderMode.InteractiveServer" />
+

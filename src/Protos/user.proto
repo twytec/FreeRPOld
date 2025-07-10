@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.User";
+import "core.proto";
+import "log.proto";
+
+package user;
+
+service GrpcUserService {
+
+	//Get user by e-mail
+	rpc GetUserByEmail (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Get user by id
+	rpc GetUserById (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Is user by ID exists
+	rpc IsUserByIdExists (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	//Get all users and API-User
+	rpc GetAllUsers (core.Empty) returns (core.FrpResponse);
+
+	//Get all users
+	rpc GetUsers (core.Empty) returns (core.FrpResponse);
+
+	//Get all API-users
+	rpc GetApiUsers (core.Empty) returns (core.FrpResponse);
+
+	//Adds the user if it does exists
+	rpc AddUser (FrpUser) returns (core.FrpResponse);
+
+	//Changes the user, if it exists
+	rpc ChangeUser (FrpUser) returns (core.FrpResponse);
+
+	//Delets the user, if it exists
+	rpc DeleteUser (FrpUser) returns (core.FrpResponse);
+
+	//Change user password
+	rpc ChangeUserPassword (FrpUser) returns (core.FrpResponse);
+
+	//Adds the API-users if it does exists
+	rpc AddApiUser (FrpUser) returns (core.FrpResponse);
+
+	//Changes the API-users, if it exists
+	rpc ChangeApiUser (FrpUser) returns (core.FrpResponse);
+
+	//Delets the API-users, if it exists
+	rpc DeleteApiUser (FrpUser) returns (core.FrpResponse);
+
+	//Changes the API-users token, if it exists
+	rpc ChangeApiUserToken (FrpUser) returns (core.FrpResponse);
+
+	//Get API-user token
+	rpc GetApiUserToken (FrpUser) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetUser (log.FrpLog) returns(core.FrpResponse);
+}
+
+//Default user
+message FrpUser {
+	//User id
+	string user_id = 1;
+
+	//First name
+	string first_name = 2;
+
+	//Last name
+	string last_name = 3;
+
+	//Phone number
+	string phone = 5;
+
+	//Email is always required
+	string email = 6;
+
+	//The password
+	string password = 7;
+
+	//A note
+	string note = 8;
+
+	//Is lock
+	bool is_lock = 9;
+
+	//UTC date and time
+	core.FrpUtcDateTime utc_date_time = 10;
+
+	//ISO language. (en, en-us, en-gb)
+	string language = 11;
+
+	//User theme
+	FrpTheme theme = 12;
+
+	//Is a API only user
+	bool is_api = 13;
+}
+
+message FrpUsers {
+	repeated FrpUser users = 1;
+}
+
+message FrpTheme {
+	bool dark_mode = 1;
+	bool right_to_left = 2;
+}
+
+message UserPermissions {
+	bool is_admin = 1;
+}

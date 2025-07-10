@@ -1,0 +1,255 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Log";
+package log;
+import "core.proto";
+
+//
+service GrpcLogService {
+
+	//Add log
+	rpc AddLog (FrpLog) returns (core.FrpResponse);
+
+	//Returns FrpLogs
+	rpc GetLogs (FrpLogFilter) returns (core.FrpResponse);
+
+	//Returns FrpLogValues
+	rpc GetLogValues (core.Empty) returns (core.FrpResponse);
+
+	//Delets the log, if it exists
+	rpc DeleteLog (FrpLog) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetLog (FrpLog) returns (core.FrpResponse);
+
+	//Add event log
+	rpc AddEventLog (FrpEventLog) returns (core.FrpResponse);
+
+	//Returns FrpEventLogs
+	rpc GetEventLogs (FrpEventLogFilter) returns (core.FrpResponse);
+
+	//Returns FrpEventLogValues
+	rpc GetEventLogValues (core.Empty) returns (core.FrpResponse);
+
+	//Delets the event log, if it exists
+	rpc DeleteEventLog (FrpEventLog) returns (core.FrpResponse);
+
+	//Add exception log
+	rpc AddExceptionLog (FrpExceptionLog) returns (core.FrpResponse);
+
+	//Returns FrpExceptionLogs
+	rpc GetExceptionLogs (FrpExceptionLogFilter) returns (core.FrpResponse);
+
+	//Returns GetExceptionLogValues
+	rpc GetExceptionLogValues (core.Empty) returns (core.FrpResponse);
+
+	//Delets the exception log, if it exists
+	rpc DeleteExceptionLog (FrpExceptionLog) returns (core.FrpResponse);
+}
+
+message FrpLog {
+
+	// ID
+	string frp_log_id = 1;
+
+	// Record type
+	string record_type = 2;
+
+	// Record type
+	string record_id = 3;
+
+	// Record as JSON
+	string record = 4;
+
+	// Log action
+	string action = 5;
+
+	// Unix timestamp
+	int64 utc_unix_time_seconds = 6;
+
+	// The ID of the user who made this change
+	string user_id = 7;
+
+	// Database ID
+	string database_id = 8;
+
+	// User-defined values
+	string val1 = 9;
+
+	// User-defined values
+	string val2 = 10;
+
+	// User-defined values
+	string val3 = 11;
+
+	// User-defined values
+	string val4 = 12;
+
+	// User-defined values
+	string val5 = 13;
+}
+
+message FrpLogs {
+	repeated FrpLog logs = 1;
+}
+
+message FrpLogFilter {
+	bool filter_from = 1;
+	core.FrpUtcDateTime from = 2;
+
+	bool filter_to = 3;
+	core.FrpUtcDateTime to = 4;
+
+	repeated FrpLogFilterItem items = 5;
+}
+
+message FrpLogFilterItem {
+	FrpLogFilterKind kind = 1;
+	FrpLogOperator operator = 2;
+	string value = 3;
+}
+
+enum FrpLogFilterKind {
+	FrpLogFilterKindAction = 0;
+	FrpLogFilterKindRecordId = 1;
+	FrpLogFilterKindRecordType = 2;
+	FrpLogFilterKindUserId = 3;
+	FrpLogFilterKindVal1 = 4;
+	FrpLogFilterKindVal2 = 5;
+	FrpLogFilterKindVal3 = 6;
+	FrpLogFilterKindVal4 = 7;
+	FrpLogFilterKindVal5 = 8;
+}
+
+message FrpLogValues {
+	repeated string record_types = 1;
+	repeated string actions = 2;
+	repeated string user_ids = 3;
+	repeated string vals1 = 4;
+	repeated string vals2 = 5;
+	repeated string vals3 = 6;
+	repeated string vals4 = 7;
+	repeated string vals5 = 8;
+}
+
+message FrpEventLog {
+	string frp_event_log_id = 1;
+	string user_id = 2;
+	string location = 3;
+	FrpEventLogLevel log_level = 4;
+	string message = 5;
+	string object_as_json = 6;
+
+	// Unix timestamp
+	int64 utc_unix_time_seconds = 7;
+}
+
+message FrpEventLogs {
+	repeated FrpEventLog logs = 1;
+}
+
+message FrpEventLogFilter {
+	bool filter_from = 1;
+	core.FrpUtcDateTime from = 2;
+
+	bool filter_to = 3;
+	core.FrpUtcDateTime to = 4;
+
+	repeated FrpEventLogFilterItem items = 5;
+}
+
+message FrpEventLogFilterItem {
+	FrpEventLogFilterKind kind = 1;
+	FrpLogOperator operator = 2;
+	string value = 3;
+	FrpEventLogLevel level_value = 4;
+}
+
+enum FrpEventLogFilterKind {
+	FrpEventLogFilterKindUserId = 0;
+	FrpEventLogFilterKindLocation = 1;
+	FrpEventLogFilterKindLogLevel = 2;
+	FrpEventLogFilterKindMessage = 3;
+	FrpEventLogFilterKindObjekt = 4;
+}
+
+enum FrpEventLogLevel {
+	FrpEventLogLevelDebug = 0;
+	FrpEventLogLevelInformation = 1;
+	FrpEventLogLevelWarning = 2;
+	FrpEventLogLevelError = 3;
+	FrpEventLogLevelCritical = 4;
+	FrpEventLogLevelNone = 5;
+}
+
+message FrpEventLogValues {
+	repeated string user_ids = 1;
+	repeated string locations = 2;
+}
+
+message FrpExceptionLog {
+	string frp_exception_log_id = 1;
+	string location = 2;
+	string message = 3;
+
+	// Unix timestamp
+	int64 utc_unix_time_seconds = 4;
+
+	// The ID of the user
+	string user_id = 5;
+
+	string val1 = 6;
+	string val2 = 7;
+	string val3 = 8;
+	string val4 = 9;
+	string val5 = 10;
+}
+
+message FrpExceptionLogs {
+	repeated FrpExceptionLog logs = 1;
+}
+
+message FrpExceptionLogValues {
+	repeated string locations = 1;
+	repeated string user_ids = 2;
+	repeated string vals1 = 3;
+	repeated string vals2 = 4;
+	repeated string vals3 = 5;
+	repeated string vals4 = 6;
+	repeated string vals5 = 7;
+}
+
+message FrpExceptionLogFilter {
+	bool filter_from = 1;
+	core.FrpUtcDateTime from = 2;
+
+	bool filter_to = 3;
+	core.FrpUtcDateTime to = 4;
+
+	repeated FrpExceptionLogFilterItem items = 5;
+}
+
+message FrpExceptionLogFilterItem {
+	FrpExceptionLogFilterKind kind = 1;
+	FrpLogOperator operator = 2;
+	string value = 3;
+}
+
+enum FrpExceptionLogFilterKind {
+	FrpExceptionLogFilterKindUserId = 0;
+	FrpExceptionLogFilterKindLocation = 1;
+	FrpExceptionLogFilterKindMessage = 2;
+	FrpExceptionLogFilterKindVal1 = 3;
+	FrpExceptionLogFilterKindVal2 = 4;
+	FrpExceptionLogFilterKindVal3 = 5;
+	FrpExceptionLogFilterKindVal4 = 6;
+	FrpExceptionLogFilterKindVal5 = 7;
+}
+
+enum FrpLogOperator {
+	FrpLogOperatorEquals = 0;
+	FrpLogOperatorNotEquals = 1;
+	FrpLogOperatorStartsWith = 2;
+	FrpLogOperatorContains = 3;
+	FrpLogOperatorEndsWith = 4;
+}

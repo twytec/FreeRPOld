@@ -1,0 +1,75 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject FreeRP.Client.Data.LocalStorage ls
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_url" InputType="InputType.Url" Label="@i18n.Text.ServerUrl" />
+        <MudSwitch @bind-Value="_saveToList" Label="@i18n.Text.Save" />
+
+        @if (_server is not null && _server.Count > 0)
+        {
+            <MudList T="string" SelectionMode="SelectionMode.SingleSelection">
+                @foreach (var item in _server)
+                {
+                    <MudListItem OnClick="(() => ServerListClick(item))">@item</MudListItem>
+                }
+            </MudList>
+        }
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Ok">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+
+    string _url = string.Empty;
+    bool _saveToList = false;
+
+    private HashSet<string>? _server;
+    private const string ServerKey = "freeRP-Server";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_server is null)
+        {
+            var json = await ls.GetPreferencesAsync(ServerKey);
+            if (json is not null)
+                Helpers.Json.TryGetModel<HashSet<string>>(json, out _server);
+        }
+    }
+
+    private void ServerListClick(string s)
+    {
+        Dialog.Close(s);
+    }
+
+    private async Task Ok()
+    {
+        if (string.IsNullOrWhiteSpace(_url))
+        {
+            return;
+        }
+
+        if (_saveToList)
+        {
+            if (_server is null)
+                _server = [];
+
+            _server.Add(_url);
+            var json = Helpers.Json.GetJson(_server);
+            await ls.SetPreferencesAsync(ServerKey, json);
+        }
+
+        Dialog.Close(_url);
+    }
+
+    void Cancel() => Dialog.Cancel();
+}

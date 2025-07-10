@@ -1,0 +1,32 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+
+<MudDialog>
+    <DialogContent>
+        <MudList T="string">
+            @if (Content is not null)
+            {
+                foreach (var item in Content)
+                {
+                    <MudListItem OnClick="(() => Pick(item.Key))">
+                        @item.Value
+                    </MudListItem>
+                }
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public Dictionary<string, string>? Content { get; set; }
+
+    private void Cancel() => Dialog.Cancel();
+    private void Pick(string id) => Dialog.Close(id);
+}

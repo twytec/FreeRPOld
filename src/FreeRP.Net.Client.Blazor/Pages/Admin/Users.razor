@@ -1,0 +1,46 @@
+﻿
+<FluentStack Orientation="Orientation.Vertical" HorizontalGap="MainLayout.StackGap" Style="padding: 4px; height: 100vh; overflow: hidden;" Width="100%">
+    <FluentToolbar Style="width: 100%;">
+        <FluentButton OnClick="UserAddClick">@I18n.Text.AddUser</FluentButton>
+        <FluentButton OnClick="UserApiAddClick">@I18n.Text.AddApiUser</FluentButton>
+    </FluentToolbar>
+    <FluentDataGrid Items="_users" ResizableColumns="true" Virtualize="true" Style="width: 100%;">
+        <PropertyColumn Property="@(p => p.Email)" Title="@I18n.Text.Email" Sortable="true" />
+        <PropertyColumn Property="@(p => p.FirstName)" Title="@I18n.Text.FirstName" Sortable="true" />
+        <PropertyColumn Property="@(p => p.LastName)" Title="@I18n.Text.Lastname" Sortable="true" />
+        <PropertyColumn Property="@(p => p.Phone)" Title="@I18n.Text.Phone" Sortable="true" />
+        <TemplateColumn Title="@I18n.Text.IsLocked" Sortable="true" SortBy="lockSort">
+            @if (context.IsLock)
+            {
+                <FluentLabel>@I18n.Text.Yes</FluentLabel>
+            }
+            else
+            {
+                <FluentLabel>@I18n.Text.No</FluentLabel>
+            }
+        </TemplateColumn>
+        <TemplateColumn Title="@I18n.Text.IsDeveloper" Sortable="true" SortBy="devSort">
+            @if (context.IsDeveloper)
+            {
+                <FluentLabel>@I18n.Text.Yes</FluentLabel>
+            }
+            else
+            {
+                <FluentLabel>@I18n.Text.No</FluentLabel>
+            }
+        </TemplateColumn>
+        <TemplateColumn Title="@I18n.Text.IsApi" Sortable="true" SortBy="apiSort">
+            @if (context.IsApi)
+            {
+                <FluentLabel>@I18n.Text.Yes</FluentLabel>
+            }
+            else
+            {
+                <FluentLabel>@I18n.Text.No</FluentLabel>
+            }
+        </TemplateColumn>
+        <TemplateColumn Title="#">
+            <FluentButton OnClick="(() => UserEdit(context))">@I18n.Text.Edit</FluentButton>
+        </TemplateColumn>
+    </FluentDataGrid>
+</FluentStack>

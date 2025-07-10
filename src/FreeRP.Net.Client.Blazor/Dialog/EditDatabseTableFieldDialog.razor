@@ -1,0 +1,140 @@
+﻿@implements IDialogContentComponent<Tuple<GrpcService.Database.Database, GrpcService.Database.DatabaseTable, GrpcService.Database.DatabaseTableField>>
+@inject Translation.I18nService i18n
+@inject Client.GrpcServices.DatabaseService databaseService
+@inject Dialog.BusyDialogService busyDialogService
+@inject IDialogService dlg
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">
+        @i18n.Text.Database
+    </FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <form @onsubmit="SendAsync" style="width: 100%;">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            @if (_create)
+            {
+                <FluentTextField @bind-Value="_databaseTableField.FieldId" Required="true" TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.DatabaseFieldId</FluentTextField>
+            }
+            else
+            {
+                <FluentTextField @bind-Value="_databaseTableField.FieldId" ReadOnly="true" TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.DatabaseFieldId</FluentTextField>
+            }
+            
+            <FluentTextField @bind-Value="_databaseTableField.Name" Required="true" TextFieldType="TextFieldType.Text" Style="width: 100%;">@i18n.Text.Name</FluentTextField>
+            <FluentTextArea @bind-Value="_databaseTableField.Description" Style="width: 100%;">@i18n.Text.Description</FluentTextArea>
+            <div style="width: 100%;">
+                <FluentSelect TOption="GrpcService.Database.DatabaseTableDataType" Style="width: 100%;" Label="@i18n.Text.DataType" @bind-SelectedOption="_databaseTableField.DataType">
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldNull">@i18n.Text.DataTypeNull</FluentOption>
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldNumber">@i18n.Text.DataTypeNumber</FluentOption>
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldString">@i18n.Text.DataTypeString</FluentOption>
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldArray">@i18n.Text.DataTypeArray</FluentOption>
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldBoolean">@i18n.Text.DataTypeBoolen</FluentOption>
+                    <FluentOption Value="GrpcService.Database.DatabaseTableDataType.FieldObject">@i18n.Text.DataTypeObject</FluentOption>
+                </FluentSelect>
+            </div>
+            <FluentSwitch @bind-Value="_databaseTableField.IsId" Label="@i18n.Text.IsId" />
+
+            @if (_err is not null)
+            {
+                <FluentLabel Color="Color.Error">
+                    @_err
+                </FluentLabel>
+            }
+
+            <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@i18n.Text.Save</FluentButton>
+        </FluentStack>
+    </form>
+</FluentDialogBody>
+
+@if (_create)
+{
+    <FluentDialogFooter Visible="false">
+    </FluentDialogFooter>
+}
+else
+{
+    <FluentDialogFooter>
+        <FluentButton OnClick="DeleteDatabase">@i18n.Text.DeleteDatabase</FluentButton>
+        </FluentDialogFooter>
+}
+
+@code {
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public Tuple<GrpcService.Database.Database, GrpcService.Database.DatabaseTable, GrpcService.Database.DatabaseTableField> Content { get; set; } = default!;
+    private GrpcService.Database.DatabaseTableField _databaseTableField = new();
+
+    bool _create = false;
+    bool _init = false;
+    string? _err;
+
+    protected override void OnParametersSet()
+    {
+        if (_init == false)
+        {
+            _init = true;
+            _databaseTableField.MergeFrom(Content.Item3);
+            _create = string.IsNullOrEmpty(Content.Item3.FieldId);
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        await busyDialogService.ShowBusyAsync();
+        var clone = Content.Item3.Clone();
+        string? res = null;
+
+        try
+        {
+            if (_create)
+            {
+                Content.Item2.Fields.Add(_databaseTableField);
+            }
+            else
+            {
+                Content.Item3.MergeFrom(_databaseTableField);
+            }
+
+            res = await databaseService.DatabaseChangeAsync(Content.Item1);
+        }
+        catch (Exception ex)
+        {
+            res = ex.Message;
+        }
+        await busyDialogService.CloseBusyAsync();
+
+        if (res is not null)
+        {
+            _err = res;
+
+            if (_create)
+            {
+                Content.Item2.Fields.Remove(_databaseTableField);
+            }
+            else
+            {
+                Content.Item3.MergeFrom(clone);
+            }
+        }
+        else
+        {
+            await Dialog.CloseAsync();
+        }
+    }
+
+    private async Task DeleteDatabase()
+    {
+        var dlgRef = await dlg.ShowConfirmationAsync(i18n.Text.ReallyDelete, i18n.Text.Yes, i18n.Text.No, Content.Item3.Name);
+        var dlgRes = await dlgRef.Result;
+        if (dlgRes.Cancelled == false)
+        {
+            Content.Item2.Fields.Remove(Content.Item3);
+            await SendAsync();
+        }
+    }
+}

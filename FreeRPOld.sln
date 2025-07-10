@@ -1,0 +1,106 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{94791A16-A8F3-4038-9068-5F78891502F4}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{C19A3DB6-FDFE-4E44-B0C9-7FBED958AC2F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP", "src\FreeRP\FreeRP.csproj", "{35D57FB3-A7DC-4EBA-8387-04E44C038F2D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.ServerCore", "src\FreeRP.ServerCore\FreeRP.ServerCore.csproj", "{EA45DB69-AE58-4C23-910A-A96E5F01715D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.ClientCore", "src\FreeRP.ClientCore\FreeRP.ClientCore.csproj", "{D8E1E7C9-4531-4165-A88B-44452EFDA8FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protos", "Protos", "{F00465D0-A0A4-43E8-840D-4C800A018602}"
+	ProjectSection(SolutionItems) = preProject
+		src\Protos\auth.proto = src\Protos\auth.proto
+		src\Protos\connect.proto = src\Protos\connect.proto
+		src\Protos\content.proto = src\Protos\content.proto
+		src\Protos\core.proto = src\Protos\core.proto
+		src\Protos\database.proto = src\Protos\database.proto
+		src\Protos\databaseAccess.proto = src\Protos\databaseAccess.proto
+		src\Protos\log.proto = src\Protos\log.proto
+		src\Protos\pdf.proto = src\Protos\pdf.proto
+		src\Protos\permission.proto = src\Protos\permission.proto
+		src\Protos\plugin.proto = src\Protos\plugin.proto
+		src\Protos\project.proto = src\Protos\project.proto
+		src\Protos\role.proto = src\Protos\role.proto
+		src\Protos\settings.proto = src\Protos\settings.proto
+		src\Protos\user.proto = src\Protos\user.proto
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.Server", "src\FreeRP.Server\FreeRP.Server.csproj", "{E9504FC5-BA47-443B-9936-AE764646AE8F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{84FDBC38-E885-4BA0-8034-169D1505348D}"
+	ProjectSection(SolutionItems) = preProject
+		docs\adminui.md = docs\adminui.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.Benchmark", "test\FreeRP.Benchmark\FreeRP.Benchmark.csproj", "{1147CE62-86DA-4582-94C0-96D0D739244B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{A2307B7E-2B2C-409C-B9BD-87B043C0FACF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.Client", "src\FreeRP.Client\FreeRP.Client.csproj", "{F72BDA4C-1323-4215-8A1B-C3A530F21387}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.ServerCore.UnitTest", "test\FreeRP.ServerCore.UnitTest\FreeRP.ServerCore.UnitTest.csproj", "{783F0043-ED6A-4D68-B9F0-1FD151037B49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreeRP.UnitTest", "test\FreeRP.UnitTest\FreeRP.UnitTest.csproj", "{66C9416E-3532-4941-A92D-5DC3029BD001}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{35D57FB3-A7DC-4EBA-8387-04E44C038F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D57FB3-A7DC-4EBA-8387-04E44C038F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35D57FB3-A7DC-4EBA-8387-04E44C038F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35D57FB3-A7DC-4EBA-8387-04E44C038F2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA45DB69-AE58-4C23-910A-A96E5F01715D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA45DB69-AE58-4C23-910A-A96E5F01715D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA45DB69-AE58-4C23-910A-A96E5F01715D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA45DB69-AE58-4C23-910A-A96E5F01715D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8E1E7C9-4531-4165-A88B-44452EFDA8FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8E1E7C9-4531-4165-A88B-44452EFDA8FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8E1E7C9-4531-4165-A88B-44452EFDA8FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8E1E7C9-4531-4165-A88B-44452EFDA8FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9504FC5-BA47-443B-9936-AE764646AE8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9504FC5-BA47-443B-9936-AE764646AE8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9504FC5-BA47-443B-9936-AE764646AE8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9504FC5-BA47-443B-9936-AE764646AE8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1147CE62-86DA-4582-94C0-96D0D739244B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1147CE62-86DA-4582-94C0-96D0D739244B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1147CE62-86DA-4582-94C0-96D0D739244B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1147CE62-86DA-4582-94C0-96D0D739244B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F72BDA4C-1323-4215-8A1B-C3A530F21387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F72BDA4C-1323-4215-8A1B-C3A530F21387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F72BDA4C-1323-4215-8A1B-C3A530F21387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F72BDA4C-1323-4215-8A1B-C3A530F21387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{783F0043-ED6A-4D68-B9F0-1FD151037B49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{783F0043-ED6A-4D68-B9F0-1FD151037B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{783F0043-ED6A-4D68-B9F0-1FD151037B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{783F0043-ED6A-4D68-B9F0-1FD151037B49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66C9416E-3532-4941-A92D-5DC3029BD001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66C9416E-3532-4941-A92D-5DC3029BD001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66C9416E-3532-4941-A92D-5DC3029BD001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66C9416E-3532-4941-A92D-5DC3029BD001}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F00465D0-A0A4-43E8-840D-4C800A018602} = {94791A16-A8F3-4038-9068-5F78891502F4}
+		{84FDBC38-E885-4BA0-8034-169D1505348D} = {94791A16-A8F3-4038-9068-5F78891502F4}
+		{1147CE62-86DA-4582-94C0-96D0D739244B} = {A2307B7E-2B2C-409C-B9BD-87B043C0FACF}
+		{783F0043-ED6A-4D68-B9F0-1FD151037B49} = {A2307B7E-2B2C-409C-B9BD-87B043C0FACF}
+		{66C9416E-3532-4941-A92D-5DC3029BD001} = {A2307B7E-2B2C-409C-B9BD-87B043C0FACF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3AC70B80-6A60-4E3C-84F5-9A696E8693F4}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,199 @@
+﻿@page "/apiusers"
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+
+<PageTitle>Home</PageTitle>
+
+@if (auth.IsAdmin)
+{
+    <MudDataGrid T="FreeRP.User.FrpUser" Items="_users" SortMode="SortMode.Multiple" Filterable="true" ShowMenuIcon="true" Hideable="true">
+        <ToolBarContent>
+            <MudButton OnClick="AddUser">@i18n.Text.ApiUserAdd</MudButton>
+            <MudSpacer />
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Email" Title="@i18n.Text.Email" />
+            <PropertyColumn Property="x => x.FirstName" Title="@i18n.Text.FirstName" />
+            <PropertyColumn Property="x => x.LastName" Title="@i18n.Text.Lastname" />
+            <TemplateColumn Title="@i18n.Text.IsLocked">
+                <CellTemplate>
+                    @if (context.Item.IsLock)
+                    {
+                        @i18n.Text.Yes
+                    }
+                    else
+                    {
+                        @i18n.Text.No
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn SortBy="x => x.UtcDateTime" Title="@i18n.Text.ExpirationDate">
+                <CellTemplate>
+                    @context.Item.UtcDateTime.ToDateTime().ToLocalTime().ToString()
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Filterable="false" Sortable="false" Hideable="false">
+                <CellTemplate>
+                    <MudButton OnClick="(() => GetApiKey(context.Item))">@i18n.Text.ApiKey</MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Filterable="false" Sortable="false" Hideable="false">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" aria-label="@i18n.Text.ApiUserAdd" title="@i18n.Text.ApiUserAdd" OnClick="() => ChangeUser(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Password" aria-label="@i18n.Text.ApiUserChangeKey" title="@i18n.Text.ApiUserChangeKey" OnClick="() => ChangeApiUserKey(context.Item)" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" aria-label="@i18n.Text.ApiUserDelete" title="@i18n.Text.ApiUserDelete" OnClick="() => DeleteUser(context.Item)" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+@code {
+    private IEnumerable<User.FrpUser>? _users;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            auth.OnLogin += async (s, e) => await LoginChange();
+            await LoginChange();
+        }
+    }
+
+    private async Task LoginChange()
+    {
+        if (auth.IsAdmin)
+        {
+            await LoadUsersAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        _users = await ds.FrpUserService.GetApiUsersAsync();
+    }
+
+    private async Task AddUser()
+    {
+        User.FrpUser user = new();
+
+        var para = new DialogParameters<Dialogs.ChangeApiUserDialog>();
+        para.Add(x => x.Content, user);
+        para.Add(x => x.NewUser, true);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeApiUserDialog>(i18n.Text.ApiUserAdd, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                var r = await ds.FrpUserService.AddApiUserAsync(user, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+
+
+    }
+
+    private async Task ChangeUser(User.FrpUser u)
+    {
+        var user = u.Clone();
+        var para = new DialogParameters<Dialogs.ChangeApiUserDialog>();
+        para.Add(x => x.Content, user);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeApiUserDialog>(i18n.Text.ApiUserChange, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                u.MergeFrom(user);
+                var r = await ds.FrpUserService.ChangeApiUserAsync(u, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+    }
+
+    private async Task ChangeApiUserKey(User.FrpUser u)
+    {
+        var user = u.Clone();
+        var para = new DialogParameters<Dialogs.ChangeApiUserKeyDialog>();
+        para.Add(x => x.Content, user);
+
+        while (true)
+        {
+            var dialog = await dlg.ShowAsync<Dialogs.ChangeApiUserKeyDialog>(i18n.Text.ApiUserChangeKey, para);
+            var res = await dialog.Result;
+
+            if (res is not null && res.Canceled == false)
+            {
+                u.MergeFrom(user);
+                var r = await ds.FrpUserService.GetApiUserTokenAsync(u, auth.FrpAuthService);
+                if (r.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    await LoadUsersAsync();
+                    break;
+                }
+                else
+                {
+                    await dlg.ShowMessageBox(i18n.Text.Error, r.Message, i18n.Text.Ok);
+                }
+            }
+            else
+                break;
+        }
+    }
+
+    private async Task GetApiKey(User.FrpUser u)
+    {
+        var res = await ds.FrpUserService.GetApiUserTokenAsync(u, auth.FrpAuthService);
+        if (res.ErrorType == FrpErrorType.ErrorNone)
+        {
+            var msg = (MarkupString)$"<span style=\"max-width: 200px; word-break: break-word; \">{res.Data}</span>";
+            await dlg.ShowMessageBox(i18n.Text.ApiKey, msg, i18n.Text.Ok);
+        }
+    }
+
+    private async Task DeleteUser(User.FrpUser u)
+    {
+        var yes = await dlg.ShowMessageBox(u.Email, i18n.Text.ReallyDelete, i18n.Text.Yes, i18n.Text.No);
+        if (yes == true)
+        {
+            var res = await ds.FrpUserService.DeleteApiUserAsync(u, auth.FrpAuthService);
+            if (res.ErrorType == FrpErrorType.ErrorNone)
+            {
+                await LoadUsersAsync();
+            }
+            else
+            {
+                await dlg.ShowMessageBox(i18n.Text.Error, res.Message, i18n.Text.Ok);
+            }
+        }
+    }
+}

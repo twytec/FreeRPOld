@@ -1,0 +1,104 @@
+﻿@inject Translation.I18nService i18n
+@inject Client.GrpcServices.AdminService adminService
+@inject Client.GrpcServices.UserService userService
+@implements IDialogContentComponent
+
+<FluentDialogHeader ShowDismiss="false">
+    <FluentLabel Typo="Typography.PaneHeader">
+        @i18n.Text.Login
+    </FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogFooter Visible="false"></FluentDialogFooter>
+
+<FluentDialogBody>
+    <form @onsubmit="Save">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            <FluentSelect @bind-Value="@loginAs" TOption="string" Width="100%">
+                <FluentOption Value="0">@i18n.Text.LoginAsUser</FluentOption>
+                <FluentOption Value="1">@i18n.Text.LoginAsDeveloper</FluentOption>
+                <FluentOption Value="2">@i18n.Text.LoginAsAdmin</FluentOption>
+            </FluentSelect>
+
+            @if (loginAs == "0" || loginAs == "1")
+            {
+                <FluentTextField style="width: 100%;"
+                                 @bind-Value=user.Email
+                                 Appearance="FluentInputAppearance.Filled"
+                                 TextFieldType="TextFieldType.Email"
+                                 Required="true">@i18n.Text.Email</FluentTextField>
+
+                <FluentTextField style="width: 100%;"
+                                 @bind-Value=user.Password
+                                 Appearance="FluentInputAppearance.Filled"
+                                 TextFieldType="TextFieldType.Password"
+                                 Required="true">@i18n.Text.Password</FluentTextField>
+            }
+            else
+            {
+                <FluentTextField style="width: 100%;"
+                                 @bind-Value=user.Email
+                                 Appearance="FluentInputAppearance.Filled"
+                                 TextFieldType="TextFieldType.Text"
+                                 Required="true">@i18n.Text.Email</FluentTextField>
+
+                <FluentTextField style="width: 100%;"
+                                 @bind-Value=user.Password
+                                 Appearance="FluentInputAppearance.Filled"
+                                 TextFieldType="TextFieldType.Password"
+                                 Required="true">@i18n.Text.Password</FluentTextField>
+            }
+
+            @if (_err is not null)
+            {
+                <FluentLabel Color="Color.Error">
+                    @_err
+                </FluentLabel>
+            }
+
+            <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@i18n.Text.Login</FluentButton>
+        </FluentStack>
+    </form>
+    </FluentDialogBody>
+
+    @code {
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    string loginAs = "0";
+    GrpcService.Core.User user = new() { Email = "admin", Password = "admin" };
+    string? _err = null;
+
+    protected override void OnParametersSet()
+    {
+        Dialog.Instance.Parameters.PreventDismissOnOverlayClick = true;
+    }
+
+    private async Task Save()
+    {
+        bool isLogin = false;
+        _err = null;
+
+        switch (loginAs)
+        {
+            case "0":
+                isLogin = await userService.LoginAsync(user);
+                break;
+            case "2":
+                isLogin = await adminService.LoginAsync(user);
+                break;
+            default:
+                break;
+        }
+
+        if (isLogin)
+        {
+            await Dialog.CloseAsync();
+        }
+        else
+        {
+            _err = i18n.Text.LoginError;
+        }
+    }
+}

@@ -1,0 +1,61 @@
+﻿@using FreeRP.User
+@rendermode InteractiveServer
+@inject FreeRP.Settings.FrpSettings frpSettings
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject Data.AuthService auth
+@inject IDialogService dlg
+
+<MudThemeProvider IsDarkMode="@_isDarkMode" />
+<MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" ClipMode="DrawerClipMode.Docked" Elevation="0" OpenMiniOnHover="true">
+    @if (auth.IsAdmin)
+    {
+        <MudNavMenu>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Settings">@i18n.Text.Settings</MudNavLink>
+            <MudNavLink Href="users" Icon="@Icons.Material.Filled.Person">@i18n.Text.User</MudNavLink>
+            <MudNavLink Href="apiusers" Icon="@Icons.Material.Filled.Workspaces">@i18n.Text.ApiUser</MudNavLink>
+            <MudNavLink Href="roles" Icon="@Icons.Material.Filled.Group">@i18n.Text.Role</MudNavLink>
+            <MudNavLink Href="databases" Icon="@Icons.Material.Filled.DataArray">@i18n.Text.Database</MudNavLink>
+            <MudNavLink Href="contents" Icon="@Icons.Material.Filled.Folder">@i18n.Text.Directory</MudNavLink>
+            <MudNavLink Href="logs" Icon="@Icons.Material.Filled.ViewList">@i18n.Text.Logs</MudNavLink>
+        </MudNavMenu>
+    }
+</MudDrawer>
+
+@code {
+
+    private bool _isDarkMode = true;
+    private bool _drawerOpen = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            FrpUser user = new();
+
+            if (frpSettings.Admin.Password == "")
+            {
+                user.Email = frpSettings.Admin.Email;
+                await auth.LoginAdminAsync(user);
+            }
+            else
+            {
+                while (auth.IsAdmin == false)
+                {
+                    var para = new DialogParameters<FreeRP.Server.Components.Pages.Dialogs.LoginDialog>();
+                    para.Add(x => x.Content, user);
+                    var dialog = await dlg.ShowAsync<FreeRP.Server.Components.Pages.Dialogs.LoginDialog>(i18n.Text.Login, para);
+                    var res = await dialog.Result;
+
+                    if (res is not null && res.Canceled == false && await auth.LoginAdminAsync(user))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            _isDarkMode = user.Theme.DarkMode;
+
+            StateHasChanged();
+        }
+    }
+}

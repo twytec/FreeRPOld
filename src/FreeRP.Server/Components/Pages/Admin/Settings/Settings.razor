@@ -1,0 +1,372 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject Data.AuthService auth
+@inject FreeRP.Settings.FrpSettings settings
+@inject FreeRP.FrpServices.IFrpSettingsService settingsService
+@inject FreeRP.ServerCore.Mail.FrpMailService mailService
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject IWebHostEnvironment env
+
+@if (auth.IsAdmin && _settings is not null)
+{
+    <MudStack Spacing="3">
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Settings</MudText>
+
+                <MudTextField Label="@i18n.Text.ServerName" @bind-Value="_settings.ServerName" />
+
+                <MudSelect Label="@i18n.Text.StaticPaths" @bind-Value="_settings.StaticPaths">
+                    <MudSelectItem Value="false">@i18n.Text.No</MudSelectItem>
+                    <MudSelectItem Value="true">@i18n.Text.Yes</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.DefaultSystemUser</MudText>
+
+                <MudTextField Label="@i18n.Text.UserName" @bind-Value="_settings.System.Email" />
+                <MudTextField Label="@i18n.Text.Id" @bind-Value="_settings.System.UserId" />
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.DefaultAdminUser</MudText>
+
+                <MudTextField Label="@i18n.Text.UserName" @bind-Value="_settings.Admin.Email" />
+                <MudTextField Label="@i18n.Text.Id" @bind-Value="_settings.Admin.UserId" />
+                <MudTextField Label="@i18n.Text.Password" InputType="_passInput" Adornment="Adornment.End"
+                              @bind-Value="_settings.Admin.Password" AdornmentIcon="@_passInputIcon"
+                              OnAdornmentClick="TogglePassword" AdornmentAriaLabel="@i18n.Text.Show" />
+                <MudSelect Label="@i18n.Text.Language" @bind-Value="_settings.Admin.Language">
+                    @foreach (var item in FreeRP.Localization.FrpLocalizationService.GetSupportedLanguages())
+                    {
+                        <MudSelectItem Value="@item">@item</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect Label="@i18n.Text.Theme" @bind-Value="_settings.Admin.Theme.DarkMode">
+                    <MudSelectItem Value="false">@i18n.Text.ThemeLight</MudSelectItem>
+                    <MudSelectItem Value="true">@i18n.Text.ThemeDark</MudSelectItem>
+                </MudSelect>
+                <MudSelect Label="@i18n.Text.RightToLeftMode" @bind-Value="_settings.Admin.Theme.RightToLeft">
+                    <MudSelectItem Value="false">@i18n.Text.No</MudSelectItem>
+                    <MudSelectItem Value="true">@i18n.Text.Yes</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Directories</MudText>
+
+                <MudTextField Label="@i18n.Text.Content" @bind-Value="_settings.ContentSettings.ContentRootPath" />
+                <MudTextField Label="@i18n.Text.Temporary" @bind-Value="_settings.ContentSettings.TempRootPath" />
+                <MudTextField Label="@i18n.Text.Trash" @bind-Value="_settings.ContentSettings.BinRootPath" />
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Database</MudText>
+
+                <MudTextField Label="@i18n.Text.Directory" @bind-Value="_settings.DatabaseSettings.DatabaseRootPath" />
+                <MudTextField Label="@i18n.Text.Id" @bind-Value="_settings.DatabaseSettings.DatabaseId" />
+                <MudSelect Label="@i18n.Text.DatabaseProvider" @bind-Value="_settings.DatabaseSettings.DatabaseProvider">
+                    <MudSelectItem Value="FreeRP.Database.DatabaseProvider.Sqlite">SQLite</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Logs</MudText>
+
+                <MudTextField Label="@i18n.Text.Directory" @bind-Value="_settings.LogSettings.LogRootPath" />
+                <MudTextField Label="@i18n.Text.Id" @bind-Value="_settings.LogSettings.DatabaseId" />
+                <MudSelect Label="@i18n.Text.DatabaseProvider" @bind-Value="_settings.LogSettings.DatabaseProvider">
+                    <MudSelectItem Value="FreeRP.Database.DatabaseProvider.Sqlite">SQLite</MudSelectItem>
+                </MudSelect>
+                <MudButton Color="Color.Default" OnClick="LogDatasetsDialog">@i18n.Text.DatasetLogging</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Login</MudText>
+
+                <MudSelect Label="@i18n.Text.Passwordless" @bind-Value="_settings.LoginSettings.Passwordless">
+                    <MudSelectItem Value="false">@i18n.Text.No</MudSelectItem>
+                    <MudSelectItem Value="true">@i18n.Text.Yes</MudSelectItem>
+                </MudSelect>
+
+                <MudNumericField Label="@i18n.Text.MinPasswordLength" @bind-Value="_settings.LoginSettings.MinPasswordLength" Step="1" />
+                <MudTextField Label="@i18n.Text.PasswordSigningKey" @bind-Value="_settings.LoginSettings.PasswordSigningKey" />
+                <MudTextField Label="@i18n.Text.TokenSigningKey" @bind-Value="_settings.LoginSettings.TokenSigningKey" />
+                <MudNumericField Label="@i18n.Text.TokenValidityInHours" @bind-Value="_settings.LoginSettings.TokenValidityInHours" Step="1" />
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">gRPC</MudText>
+
+                <MudNumericField Label="@i18n.Text.GrpcMessageSizeInByte" @bind-Value="_settings.GrpcSettings.GrpcMessageSizeInByte" Step="1" />
+                <MudNumericField Label="@i18n.Text.GrpcTransportTimeoutInMinutes" @bind-Value="_settings.GrpcSettings.GrpcTransportTimeoutInMinutes" Step="1" />
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-5">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body1">@i18n.Text.Email</MudText>
+
+                <MudTextField Label="@i18n.Text.Email" @bind-Value="_settings.SmtpSettings.EMail" />
+                <MudTextField Label="SMTP-Server" @bind-Value="_settings.SmtpSettings.Host" />
+                <MudNumericField Label="SMTP-Port" @bind-Value="_settings.SmtpSettings.Port" Step="1" />
+                <MudTextField Label="@i18n.Text.UserName" @bind-Value="_settings.SmtpSettings.Username" />
+                <MudTextField Label="@i18n.Text.Password" InputType="_passInput" Adornment="Adornment.End"
+                              @bind-Value="_settings.SmtpSettings.Password" AdornmentIcon="@_passInputIcon"
+                              OnAdornmentClick="TogglePassword" AdornmentAriaLabel="@i18n.Text.Show" />
+
+                <MudButton Color="Color.Default" OnClick="SendTestEmailAsync">@i18n.Text.TestEmail</MudButton>
+            </MudStack>
+        </MudPaper>
+        
+
+        <MudButton Color="Color.Primary" OnClick="Save">@i18n.Text.Save</MudButton>
+    </MudStack>
+    
+}
+
+@code {
+
+    private InputType _passInput = InputType.Password;
+    private string _passInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private string _testEmail = string.Empty;
+    FreeRP.Settings.FrpSettings? _settings = null;
+
+    protected override void OnParametersSet()
+    {
+        if (_settings is null)
+            _settings = settings.Clone();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            auth.OnLogin += (s, e) => LoginChange();
+            LoginChange();
+        }
+    }
+
+    private void LoginChange()
+    {
+        if (auth.IsAdmin)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void TogglePassword()
+    {
+        if (_passInput == InputType.Password)
+        {
+            _passInput = InputType.Text;
+            _passInputIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            _passInput = InputType.Password;
+            _passInputIcon = Icons.Material.Filled.VisibilityOff;
+        }
+    }
+
+    private async Task LogDatasetsDialog()
+    {
+        if (_settings is null)
+            return;
+
+        var para = new DialogParameters<Dialogs.RecordTypesDialog>()
+        {
+            { x => x.RecordTypes, _settings.LogSettings.LogRecordTypes.ToList() }
+        };
+
+        var dref = await dlg.ShowAsync<Dialogs.RecordTypesDialog>(i18n.Text.DatasetLogging, para);
+        var res = await dref.Result;
+
+        if (res is not null && res.Canceled == false && res.Data is IEnumerable<string> l)
+        {
+            _settings.LogSettings.LogRecordTypes.Clear();
+            _settings.LogSettings.LogRecordTypes.AddRange(l);
+        }
+    }
+
+    private async Task SendTestEmailAsync()
+    {
+        if (_settings is null)
+            return;
+
+        var para = new DialogParameters<FreeRP.Server.Components.Pages.Dialogs.EditTextDialog>()
+        {
+            { x => x.Label, i18n.Text.Email }
+        };
+
+        var dlgRef = await dlg.ShowAsync<FreeRP.Server.Components.Pages.Dialogs.EditTextDialog>(i18n.Text.TestEmail, para);
+        var res = await dlgRef.Result;
+
+        if (res is not null && res.Canceled == false && res.Data is string s)
+        {
+            if (await mailService.TrySendMailAsync(_settings, s, i18n.Text.TestEmail, "", auth.FrpAuthService))
+            {
+                await dlg.ShowMessageBox(i18n.Text.Email, i18n.Text.SuccessfullySent, i18n.Text.Ok);
+            }
+            else
+            {
+                await dlg.ShowMessageBox(i18n.Text.Error, i18n.Text.ErrorUnknown, i18n.Text.Ok);
+            }
+        }
+    }
+
+    private async Task Save()
+    {
+        if (_settings is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_settings.ServerName))
+            _settings.ServerName = "FreeRP";
+
+        CheckSystemUser();
+        CheckAdminUser();
+        await CheckContentAsync();
+        await CheckDatabaseAsync();
+        await CheckLogAsync();
+        await CheckLoginAsync();
+        CheckGrpc();
+
+        await settingsService.SaveSettingsAsync(env.ContentRootPath, _settings);
+
+        settings.LogSettings.LogRecordTypes.Clear();
+        settings.MergeFrom(_settings);
+    }
+
+    private void CheckSystemUser()
+    {
+        if (_settings is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_settings.System.Email))
+            _settings.System.Email = "System";
+        if (string.IsNullOrWhiteSpace(_settings.System.UserId))
+            _settings.System.Email = "-1";
+    }
+
+    private void CheckAdminUser()
+    {
+        if (_settings is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_settings.Admin.Email))
+            _settings.Admin.Email = "System";
+        if (string.IsNullOrWhiteSpace(_settings.Admin.UserId))
+            _settings.Admin.Email = "-1";
+        if (string.IsNullOrWhiteSpace(_settings.Admin.Language))
+            _settings.Admin.Email = "en";
+    }
+
+    private async Task CheckContentAsync()
+    {
+        if (_settings is null)
+            return;
+
+        if (TryCheckPathError(_settings.ContentSettings.ContentRootPath, out string? err1))
+            await dlg.ShowMessageBox(i18n.Text.Error, err1, i18n.Text.Ok);
+        if (TryCheckPathError(_settings.ContentSettings.TempRootPath, out string? err2))
+            await dlg.ShowMessageBox(i18n.Text.Error, err2, i18n.Text.Ok);
+        if (TryCheckPathError(_settings.ContentSettings.BinRootPath, out string? err3))
+            await dlg.ShowMessageBox(i18n.Text.Error, err3, i18n.Text.Ok);
+    }
+
+    private async Task CheckDatabaseAsync()
+    {
+        if (_settings is null)
+            return;
+
+        if (TryCheckPathError(_settings.DatabaseSettings.DatabaseRootPath, out string? err1))
+            await dlg.ShowMessageBox(i18n.Text.Error, err1, i18n.Text.Ok);
+
+        if (string.IsNullOrWhiteSpace(_settings.DatabaseSettings.DatabaseId))
+            _settings.DatabaseSettings.DatabaseId = "freeRPAppDb";
+    }
+
+    private async Task CheckLogAsync()
+    {
+        if (_settings is null)
+            return;
+
+        if (TryCheckPathError(_settings.LogSettings.LogRootPath, out string? err1))
+            await dlg.ShowMessageBox(i18n.Text.Error, err1, i18n.Text.Ok);
+
+        if (string.IsNullOrWhiteSpace(_settings.LogSettings.DatabaseId))
+            _settings.LogSettings.DatabaseId = "freerpLogDB";
+    }
+
+    private async Task CheckLoginAsync()
+    {
+        if (_settings is null)
+            return;
+
+        if (_settings.LoginSettings.Passwordless)
+        {
+            if (string.IsNullOrWhiteSpace(_settings.SmtpSettings.Host))
+            {
+                await dlg.ShowMessageBox(i18n.Text.Error, i18n.Text.ErrorPasswordlessMail, i18n.Text.Ok);
+                return;
+            }
+        }
+
+        if (_settings.LoginSettings.MinPasswordLength == 0)
+            _settings.LoginSettings.MinPasswordLength = 8;
+
+        if (string.IsNullOrWhiteSpace(_settings.LoginSettings.PasswordSigningKey))
+            _settings.LoginSettings.PasswordSigningKey = Guid.NewGuid().ToString("N");
+
+        if (string.IsNullOrWhiteSpace(_settings.LoginSettings.TokenSigningKey))
+            _settings.LoginSettings.TokenSigningKey = Guid.NewGuid().ToString("N");
+
+        if (_settings.LoginSettings.TokenValidityInHours == 0)
+            _settings.LoginSettings.TokenValidityInHours = 1;
+    }
+
+    private void CheckGrpc()
+    {
+        if (_settings is null)
+            return;
+
+        if (_settings.GrpcSettings.GrpcTransportTimeoutInMinutes == 0)
+            _settings.GrpcSettings.GrpcTransportTimeoutInMinutes = 5;
+    }
+
+    private bool TryCheckPathError(string path, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out string err)
+    {
+        try
+        {
+            if (Directory.Exists(path) == false)
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            err = null;
+            return false;
+        }
+        catch (Exception ex)
+        {
+            err = ex.Message;
+            return true;
+        }
+    }
+}

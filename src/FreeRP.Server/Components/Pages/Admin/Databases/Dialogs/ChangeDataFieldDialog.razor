@@ -1,0 +1,58 @@
+﻿@using FreeRP.Database
+@inject FreeRP.Localization.FrpLocalizationService i18n
+
+<MudDialog>
+    <DialogContent>
+        <MudForm>
+            <MudTextField @bind-Value="Field.FieldId" InputType="InputType.Text" Label="@i18n.Text.Id" />
+
+            <MudSwitch Class="mt-2" @bind-Value="Field.IsPrimaryKey" Label="@i18n.Text.PrimaryKey" />
+
+            <MudTextField @bind-Value="Field.Name" InputType="InputType.Text" Label="@i18n.Text.Name" />
+            <MudTextField @bind-Value="Field.Description" InputType="InputType.Text" Label="@i18n.Text.Description" Lines="3" />
+
+            <MudSelect @bind-Value="Field.DataType" Label="@i18n.Text.DataType">
+                <MudSelectItem Value="FrpDatabaseDataType.FieldNull">@i18n.Text.DataTypeNull</MudSelectItem>
+                <MudSelectItem Value="FrpDatabaseDataType.FieldString">@i18n.Text.DataTypeString</MudSelectItem>
+                <MudSelectItem Value="FrpDatabaseDataType.FieldNumber">@i18n.Text.DataTypeNumber</MudSelectItem>
+                <MudSelectItem Value="FrpDatabaseDataType.FieldArray">@i18n.Text.DataTypeArray</MudSelectItem>
+                <MudSelectItem Value="FrpDatabaseDataType.FieldBoolean">@i18n.Text.DataTypeBoolen</MudSelectItem>
+                <MudSelectItem Value="FrpDatabaseDataType.FieldObject">@i18n.Text.DataTypeObject</MudSelectItem>
+            </MudSelect>
+
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        @if (string.IsNullOrEmpty(Field.FieldId))
+        {
+            <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        }
+        <MudButton Color="Color.Primary" OnClick="Save">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public FrpDataField Field { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        i18n.TextChanged += () => StateHasChanged();
+    }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private void Save()
+    {
+        if (string.IsNullOrWhiteSpace(Field.FieldId) == false)
+        {
+            Field.FieldId = Helpers.Json.ToCamelCase(Field.FieldId.Replace(" ", ""));
+        }
+
+        Dialog.Close();
+    }
+}

@@ -1,0 +1,59 @@
+﻿@implements IDialogContentComponent<Data.TextEdit>
+
+@if (Content.Required)
+{
+    <FluentDialogHeader ShowDismiss="false">
+        <FluentLabel Typo="Typography.PaneHeader">
+            @Dialog.Instance.Parameters.Title
+        </FluentLabel>
+    </FluentDialogHeader>
+}
+else
+{
+    <FluentDialogHeader ShowDismiss="true">
+        <FluentLabel Typo="Typography.PaneHeader">
+            @Dialog.Instance.Parameters.Title
+        </FluentLabel>
+    </FluentDialogHeader>
+}
+
+
+<FluentDialogFooter Visible="false">
+
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <form @onsubmit="Save">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            <FluentTextField style="width: 100%;"
+                             @bind-Value=Content.Text
+                             Appearance="FluentInputAppearance.Filled"
+                             TextFieldType="Content.FieldType"
+                             Required="Content.Required">@Content.Label</FluentTextField>
+
+            <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@Dialog.Instance.Parameters.PrimaryAction</FluentButton>
+        </FluentStack>
+    </form>
+</FluentDialogBody>
+
+    @code {
+
+    [Parameter]
+    public Data.TextEdit Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        if (Content.Required)
+        {
+            Dialog.Instance.Parameters.PreventDismissOnOverlayClick = true;
+        }
+    }
+
+    private async void Save()
+    {
+        await Dialog.CloseAsync();
+    }
+}

@@ -1,0 +1,37 @@
+﻿@page "/"
+@inject FreeRP.FrpServices.IFrpDataService _ds
+@inject FreeRP.ClientCore.FrpClientSettings _settings
+@inject IDialogService _dlg
+@inject Data.LocalStorage ls
+@inject IJSRuntime js
+
+<PageTitle>FreeRP</PageTitle>
+<MudThemeProvider IsDarkMode="@_isDarkMode" />
+
+<div style="display: grid; grid-template-columns: 56px 1fr; height: 100vh; width: 100%;">
+    <div style="width: 56px; display: block;">
+        <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" ClipMode="DrawerClipMode.Docked" Elevation="0" OpenMiniOnHover="true">
+            <MudNavMenu>
+                <MudNavLink OnClick="WebTopClick" Icon="@Icons.Material.Filled.GridView">Webtop</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+    </div>
+    <div style="height: 100vh; width: 100%; overflow: hidden;">
+        @if (_ds.FrpAuthService.IsLogin && _frpPlugin is null)
+        {
+            <MudStack Wrap="Wrap.Wrap" Row="true" Spacing="2">
+                @foreach (var item in _ds.FrpAuthService.Plugins)
+                {
+                    <MudButton Variant="Variant.Text" OnClick="(() => LoadPlugin(item))">
+                        <MudImage Src="@item.IconUrl" />
+                    </MudButton>
+                }
+            </MudStack>
+        }
+        @* <iframe src="/test.html?url=1234"></iframe> *@
+    </div>
+</div>
+
+<MudPopoverProvider />
+<MudDialogProvider BackdropClick="false" FullWidth="true" MaxWidth="MaxWidth.Medium" />
+<MudSnackbarProvider />

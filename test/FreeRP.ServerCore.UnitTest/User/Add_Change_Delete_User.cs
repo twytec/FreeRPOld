@@ -1,0 +1,63 @@
+﻿using FreeRP.FrpServices;
+using FreeRP.ServerCore.Auth;
+using FreeRP.User;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FreeRP.ServerCore.UnitTest.User
+{
+    [TestClass]
+    public class Add_Change_Delete_User
+    {
+        private readonly FrpDataService _data = MySettings.FrpDataService;
+        private readonly FrpAuthService _admin = MySettings.TestAdmin;
+
+        [TestMethod]
+        public async Task Test()
+        {
+            FrpUser user = new()
+            {
+                Email = "Add_Change_Delete_User@test.com",
+                Password = "TestPass123!"
+            };
+
+            //Add
+            var res = await _data.FrpUserService.AddUserAsync(user, _admin);
+            Assert.IsTrue(res.ErrorType == FrpErrorType.ErrorNone);
+
+            //Change
+            user.Email = 1 + user.Email;
+            res = await _data.FrpUserService.ChangeUserAsync(user, _admin);
+            Assert.IsTrue(res.ErrorType == FrpErrorType.ErrorNone);
+
+            //Get
+            Assert.IsNotNull(await _data.FrpUserService.GetUserByEmailAsync(user.Email));
+
+            //Delete
+            res = await _data.FrpUserService.DeleteUserAsync(user, _admin);
+            Assert.IsTrue(res.ErrorType == FrpErrorType.ErrorNone);
+
+            //Logs
+            var ls = new FreeRP.Log.FrpLogFilter();
+            ls.Items.Add(new FreeRP.Log.FrpLogFilterItem()
+            {
+                Kind = FreeRP.Log.FrpLogFilterKind.RecordId,
+                Operator = FreeRP.Log.FrpLogOperator.Equals,
+                Value = user.UserId
+            });
+            var logs = await _data.FrpLogService.GetLogsAsync(ls, _admin);
+            Assert.IsTrue(logs.Count() == 3);
+
+            var del = logs.FirstOrDefault(x => x.Action == IFrpLogService.ActionDelete);
+            Assert.IsNotNull(del);
+            res = await _data.FrpLogService.ResetLogAsync(del, _admin);
+            Assert.IsTrue(res.ErrorType == FrpErrorType.ErrorNone);
+
+            //Get
+            Assert.IsNotNull(await _data.FrpUserService.GetUserByEmailAsync(user.Email));
+        }
+    }
+}

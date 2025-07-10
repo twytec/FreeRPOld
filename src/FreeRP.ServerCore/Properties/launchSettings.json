@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "FreeRP.ServerCore": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:36496;http://localhost:36497"
+    }
+  }
+}

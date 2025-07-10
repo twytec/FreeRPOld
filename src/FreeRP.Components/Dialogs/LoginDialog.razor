@@ -1,0 +1,32 @@
+﻿@inject FreeRP.Translation.I18nService i18n
+
+<MudDialog Style="min-width: 280px;">
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="Content.Email" InputType="InputType.Email" Label="@i18n.Text.Email"
+                          Required="true" RequiredError="@i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Email)" />
+
+            <MudTextField @bind-Value="Content.Password" InputType="InputType.Password" Label="@i18n.Text.Password"
+                          Required="true" RequiredError="@i18n.Text.XIsRequired.Replace("{0}", i18n.Text.Password)" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="(_isValid == false)" Color="Color.Primary" OnClick="Save">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public User Content { get; set; } = default!;
+
+    private bool _isValid = false;
+
+    private void Save()
+    {
+        Dialog.Close();
+    }
+}

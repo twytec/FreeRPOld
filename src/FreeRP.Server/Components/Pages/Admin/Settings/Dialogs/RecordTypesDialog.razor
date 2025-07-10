@@ -1,0 +1,65 @@
+﻿@using FreeRP.Database
+@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject IDialogService dlg
+
+<MudDialog>
+    <DialogContent>
+        <MudList T="string" @bind-SelectedValues="_selectRecordTypes" SelectionMode="SelectionMode.MultiSelection">
+            <MudListItem Text="@FreeRP.FrpServices.IFrpSettingsService.FreeRPName">
+                <NestedList>
+                    @foreach (var item in FreeRP.FrpServices.IFrpSettingsService.SystemRecordTypes)
+                    {
+                        <MudListItem Text="@item" Value="@item" />
+                    }
+                </NestedList>
+            </MudListItem>
+            @if (_databases is not null)
+            {
+                foreach (var db in _databases)
+                {
+                    <MudListItem Text="@db.GetName()">
+                        <NestedList>
+                            @foreach (var d in db.Datasets)
+                            {
+                                string recordType = FreeRP.ServerCore.Database.FrpDatabaseAccessService.GetRecordType(db.DatabaseId, d.DatasetId);
+                                <MudListItem Text="@d.GetName()" Value="@recordType" />
+                            }
+                        </NestedList>
+                    </MudListItem>
+                }
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@i18n.Text.Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Close">@i18n.Text.Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public List<string> RecordTypes { get; set; } = [];
+
+    private bool _init = false;
+    private IReadOnlyCollection<string>? _selectRecordTypes;
+
+    private IEnumerable<FrpDatabase>? _databases;
+
+    void Cancel() => Dialog.Cancel();
+    void Close() => Dialog.Close(_selectRecordTypes);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_init == false)
+        {
+            _init = true;
+            _databases = await ds.FrpDatabaseService.GetAllDatabasesAsync();
+            _selectRecordTypes = RecordTypes;
+        }
+    }
+}

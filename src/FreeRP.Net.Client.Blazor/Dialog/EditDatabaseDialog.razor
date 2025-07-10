@@ -1,0 +1,136 @@
+﻿@implements IDialogContentComponent<GrpcService.Database.Database>
+@inject Translation.I18nService i18n
+@inject Client.GrpcServices.DatabaseService databaseService
+@inject Dialog.BusyDialogService busyDialogService
+@inject IDialogService dlg
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">
+        @i18n.Text.Database
+    </FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <form @onsubmit="SendAsync" style="width: 100%;">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap">
+            @if (_create)
+            {
+                <FluentTextField @bind-Value="_database.DatabaseId" Required="true" TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.DatabaseId</FluentTextField>
+            }
+            else
+            {
+                <FluentTextField @bind-Value="_database.DatabaseId" ReadOnly="true" TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.DatabaseId</FluentTextField>
+            }
+            
+            <FluentTextField @bind-Value="_database.Name" Required="true" TextFieldType="TextFieldType.Text" style="width: 100%;">@i18n.Text.Name</FluentTextField>
+            <FluentTextArea @bind-Value="_database.Description" Style="width: 100%;">@i18n.Text.Description</FluentTextArea>
+            <FluentSwitch @bind-Value="_database.AllowUnknownTables" Label="@i18n.Text.AllowUnknownTables" />
+
+            @if (_err is not null)
+            {
+                <FluentLabel Color="Color.Error">
+                    @_err
+                </FluentLabel>
+            }
+
+            <FluentButton Style="width: 100%;" Type="ButtonType.Submit">@i18n.Text.Save</FluentButton>
+        </FluentStack>
+    </form>
+</FluentDialogBody>
+
+@if (_create)
+{
+    <FluentDialogFooter Visible="false">
+    </FluentDialogFooter>
+}
+else
+{
+    <FluentDialogFooter>
+        <FluentButton OnClick="DeleteDatabase">@i18n.Text.DeleteDatabase</FluentButton>
+    </FluentDialogFooter>
+}
+
+@code {
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public GrpcService.Database.Database Content { get; set; } = default!;
+    private GrpcService.Database.Database _database = new();
+
+    bool _create = false;
+    bool _init = false;
+    string? _err;
+
+    protected override void OnParametersSet()
+    {
+        if (_init == false)
+        {
+            _init = true;
+            _database.MergeFrom(Content);
+            _create = string.IsNullOrEmpty(Content.DatabaseId);
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        await busyDialogService.ShowBusyAsync();
+        string? res = null;
+        try
+        {
+            if (_create)
+            {
+                res = await databaseService.DatabaseAddAsync(_database);
+            }
+            else
+            {
+                res = await databaseService.DatabaseChangeAsync(_database);
+                Content.MergeFrom(_database);
+            }
+        }
+        catch (Exception ex)
+        {
+            res = ex.Message;
+        }
+        await busyDialogService.CloseBusyAsync();
+
+        if (res is not null)
+        {
+            _err = res;
+        }
+        else
+        {
+            await Dialog.CloseAsync();
+        }
+    }
+
+    private async Task DeleteDatabase()
+    {
+        var dlgRef = await dlg.ShowConfirmationAsync(i18n.Text.ReallyDelete, i18n.Text.Yes, i18n.Text.No, Content.Name);
+        var dlgRes = await dlgRef.Result;
+        if (dlgRes.Cancelled == false)
+        {
+            await busyDialogService.ShowBusyAsync();
+            string? res = null;
+            try
+            {
+                res = await databaseService.DatabaseDeleteAsync(_database);
+            }
+            catch (Exception ex)
+            {
+                res = ex.Message;
+            }
+            await busyDialogService.CloseBusyAsync();
+
+            if (res is not null)
+            {
+                _err = res;
+            }
+            else
+            {
+                await Dialog.CloseAsync();
+            }
+        }
+    }
+}

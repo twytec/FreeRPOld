@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Database";
+import "core.proto";
+import "log.proto";
+
+package database;
+
+service GrpcDatabaseService
+{
+	// Returns all databases
+	rpc GetAllDatabases (core.Empty) returns(core.FrpResponse);
+
+	//Returns the database by Id if exist
+	rpc GetDatabaseById (core.FrpStringValueRequest) returns(core.FrpResponse);
+
+	// Adds the database if it does not exist
+	rpc AddDatabase (FrpDatabase) returns (core.FrpResponse);
+
+	// Changes the database if exists
+	rpc ChangeDatabase (FrpDatabase) returns (core.FrpResponse);
+
+	// Deletes the database if exists
+	rpc DeleteDatabase (FrpDatabase) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetDatabase (log.FrpLog) returns(core.FrpResponse);
+}
+
+//A database
+message FrpDatabase {
+	//Database id
+	string database_id = 1;
+
+	//The name of the Database
+	string name = 2;
+
+	//The description of the Database
+	string description = 3;
+
+	//The connection string to database
+	string connection_string = 4;
+
+	//The database provider 
+	DatabaseProvider database_provider = 5;
+
+	//Data sets
+	repeated FrpDataset datasets = 6;
+
+	//Allow unknown tables
+	bool allow_unknown_data = 7;
+
+	//Access mode
+	FrpAccessMode access_mode = 8;
+
+	bool log_changes = 9;
+}
+
+message FrpDatabases {
+	repeated FrpDatabase databases = 1;
+}
+
+//Supported databases
+enum DatabaseProvider {
+	SQLite = 0;
+}
+
+//A data set in the database
+message FrpDataset {
+	//Data set id
+	string dataset_id = 1;
+
+	//The name of the table
+	string name = 2;
+
+	//The description of the table
+	string description = 3;
+
+	//Table fields
+	repeated FrpDataField fields = 4;
+
+	//Maximum records per query
+	int32 max_records_per_query = 5;
+
+	//Allow unknown fields
+	bool allow_unknown_fields = 6;
+}
+
+//A field of a data set
+message FrpDataField {
+	//Field id in camel-case notation.
+	string field_id = 1;
+
+	//Is PrimaryKey
+	bool is_primary_key = 2;
+
+	//The name of field
+	string name = 3;
+
+	//Field description
+	string description = 4;
+
+	//The type of the field
+	FrpDatabaseDataType data_type = 5;
+
+	//Fields
+	repeated FrpDataField fields = 6;
+}
+
+//A data type
+enum FrpDatabaseDataType {
+	FieldNull = 0;
+	FieldString = 1;
+	FieldNumber = 2;
+	FieldArray = 3;
+	FieldBoolean = 4;
+	FieldObject = 5;
+}
+
+enum FrpAccessMode
+{
+	AccessModeRole = 0;
+	AccessModeUser = 1;
+	AccessModeCustom = 2;
+}
+
+message FrpRecord {
+	string record_id = 1;
+	string record_type = 2;
+	int64 ticks = 3;
+	string change_by = 4;
+	string data_as_json = 5;
+	string owner = 6;
+}
+

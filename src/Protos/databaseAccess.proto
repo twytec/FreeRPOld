@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Database";
+import "core.proto";
+import "log.proto";
+
+package databaseaccess;
+
+service GrpcDatabaseAccessService
+{
+	// Returns the database permissions for the user
+	rpc GetDatabasePermissions (core.FrpStringValueRequest) returns(core.FrpResponse);
+
+	// Opens the database unit if it exists and the user has access to it
+	rpc OpenDatabase (core.FrpStringValueRequest) returns(core.FrpResponse);
+
+	// Saves all changes in the database if the database is open
+	rpc SaveChanges (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	// Closes the database if it is open and releases all resources
+	rpc CloseDatabase (core.FrpStringValueRequest) returns (core.FrpResponse);
+
+	// Adds the item to the database
+	rpc AddDataset (FrpDataRequest) returns (core.FrpResponse);
+
+	// Updates the item in the database
+	rpc ChangeDataset (FrpDataRequest) returns (core.FrpResponse);
+
+	// Delets the item in the database
+	rpc DeleteDataset (FrpDataRequest) returns (core.FrpResponse);
+
+	// Returns the first element of a sequence that satisfies a specified condition or a default value if no such element is found.
+	rpc FirstOrDefault (FrpQueryRequest) returns (core.FrpResponse);
+
+	// Searching for items via a query
+	rpc ListOrDefault (FrpQueryRequest) returns (core.FrpResponse);
+
+	//Reset to the log entry
+	rpc ResetDatabaseAccess (log.FrpLog) returns(core.FrpResponse);
+}
+
+message FrpDataRequest
+{
+	string database_id = 1;
+	string dataset_id = 2;
+	string data_id = 3;
+	bytes data = 4;
+}
+
+message FrpQueryRequest
+{
+	string database_id = 1;
+	string dataset_id = 2;
+	repeated FrpQuery queries = 3;
+	int32 take = 4;
+	int32 skipe = 5;
+}
+
+message FrpQuery {
+	bool is_member = 1;
+	FrpQueryType member_type = 2;
+	string name = 3;
+	string value = 4;
+	FrpQueryType value_type = 5;
+	FrpQueryType call_type = 6;
+	FrpQueryType next = 7;
+}
+
+enum FrpQueryType {
+	QueryNone = 0;
+
+	QueryGreaterThan = 1;
+	QueryGreaterThanOrEqual = 2;
+	QueryLessThan = 3;
+	QueryLessThanOrEqual = 4;
+	QueryEqual = 5;
+	QueryNotEqual = 6;
+	QueryAnd = 7;
+	QueryOr = 8;
+	QueryAndAlso = 9;
+	QueryOrElse = 10;
+	QueryAdd = 11;
+	QueryMultiply = 12;
+	QuerySubtract = 13;
+	QueryDivide = 14;
+
+	ValueNull = 50;
+	ValueString = 51;
+	ValueNumber = 52;
+	ValueArray = 53;
+	ValueBoolean = 54;
+	ValueObject = 55;
+	ValueFrpDateTime = 56;
+	ValueFrpFile = 57;
+
+	CallContains = 100;
+	CallStartWith = 101;
+	CallEndsWith = 102;
+	CallEquals = 103;
+	CallToLower = 104;
+	CallToUpper = 105;
+	CallIsNullOrEmpty = 106;
+	CallCount = 107;
+	CallArrayIndex = 108;
+	CallIndexOf = 109;
+}

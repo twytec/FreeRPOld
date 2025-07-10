@@ -1,0 +1,223 @@
+﻿@inject FreeRP.Localization.FrpLocalizationService i18n
+@inject IDialogService dlg
+@inject FreeRP.FrpServices.IFrpDataService ds
+@inject Data.AuthService auth
+
+<MudDialog>
+    <DialogContent>
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-2">
+            <MudTabPanel Text="@i18n.Text.User">
+                <MudSelect T="string" Label="@i18n.Text.User" ValueChanged="SelectUser">
+                    @if (_users is not null)
+                    {
+                        foreach (var item in _users)
+                        {
+                            <MudSelectItem Value="item.UserId">@item.GetName()</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+                <MudStack Spacing="2" Class="mt-2">
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectUserAccess.PermissionValues.Read" Label="@i18n.Text.Read">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectUserAccess.PermissionValues.Add" Label="@i18n.Text.Add">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectUserAccess.PermissionValues.Delete" Label="@i18n.Text.Delete">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectUserAccess.PermissionValues.Change" Label="@i18n.Text.Change">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
+                <MudButton OnClick="SaveUser" Class="mt-2" FullWidth="true">@i18n.Text.Save</MudButton>
+            </MudTabPanel>
+
+            <MudTabPanel Text="@i18n.Text.Role">
+                <MudSelect T="string" Label="@i18n.Text.Role" ValueChanged="SelectRole">
+                    @if (_roles is not null)
+                    {
+                        foreach (var item in _roles)
+                        {
+                            <MudSelectItem Value="item.RoleId">@item.Name</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+                <MudStack Spacing="2" Class="mt-2">
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectRoleAccess.PermissionValues.Read" Label="@i18n.Text.Read">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectRoleAccess.PermissionValues.Add" Label="@i18n.Text.Add">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectRoleAccess.PermissionValues.Delete" Label="@i18n.Text.Delete">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="FreeRP.FrpPermissionValue" @bind-Value="_selectRoleAccess.PermissionValues.Change" Label="@i18n.Text.Change">
+                        <MudSelectItem Value="FrpPermissionValue.Undefined">@i18n.Text.Undefined</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Allow">@i18n.Text.Yes</MudSelectItem>
+                        <MudSelectItem Value="FrpPermissionValue.Denied">@i18n.Text.No</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
+                <MudButton OnClick="SaveRole" Class="mt-2" FullWidth="true">@i18n.Text.Save</MudButton>
+            </MudTabPanel>
+        </MudTabs>
+        @if (_err is not null)
+        {
+            <MudText Class="mt-2" Color="Color.Error">@_err</MudText>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public string Uri { get; set; } = default!;
+
+    string? _err;
+    IEnumerable<FrpPermission>? _accesses;
+    IEnumerable<FreeRP.User.FrpUser>? _users;
+    IEnumerable<FreeRP.Role.FrpRole>? _roles;
+
+    private FrpPermission _selectUserAccess = new() { PermissionValues = new() };
+    private string? _selectUserId;
+
+    private FrpPermission _selectRoleAccess = new() { PermissionValues = new() };
+    private string? _selectRoleId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_accesses is null)
+        {
+            _users = await ds.FrpUserService.GetAllUsersAsync();
+            _roles = await ds.FrpRoleService.GetAllRolesAsync();
+            await LoadPermissionAsync();
+        }
+    }
+
+    private async ValueTask LoadPermissionAsync() => _accesses = await ds.FrpPermissionService.GetContentPermissionsAsync(Uri);
+
+    void Cancel() => Dialog.Cancel();
+
+    private void SelectUser(string id)
+    {
+        _selectUserId = id;
+        if (_accesses is not null)
+        {
+            var a = _accesses.FirstOrDefault(x => x.MemberId == id && x.MemberIdKind == MemberIdKind.User);
+            if (a is not null)
+                _selectUserAccess = a.Clone();
+        }
+    }
+
+    private void SelectRole(string id)
+    {
+        _selectRoleId = id;
+        if (_accesses is not null)
+        {
+            var a = _accesses.FirstOrDefault(x => x.MemberId == id && x.MemberIdKind == MemberIdKind.Role);
+            if (a is not null)
+                _selectRoleAccess = a.Clone();
+        }
+    }
+
+    private async Task SaveUser()
+    {
+        if (_selectUserId is not null)
+        {
+            await SaveAsync(_selectUserAccess, MemberIdKind.User);
+        }
+    }
+
+    private async Task SaveRole()
+    {
+        if (_selectRoleId is not null)
+        {
+            await SaveAsync(_selectRoleAccess, MemberIdKind.Role);
+        }
+    }
+
+    private async Task SaveAsync(FrpPermission ac, MemberIdKind kind)
+    {
+        _err = null;
+
+        if (string.IsNullOrEmpty(ac.MemberIdAccessUri) == false)
+        {
+            //Delete premission
+            if (FrpPermissionValues.AreAll(ac.PermissionValues, FrpPermissionValue.Undefined))
+            {
+                var res = await ds.FrpPermissionService.DeletePermissionAsync(ac, auth.FrpAuthService);
+                if (res.ErrorType == FrpErrorType.ErrorNone)
+                {
+                    ac = new() { PermissionValues = new() };
+                    await LoadPermissionAsync();
+                }
+                else
+                {
+                    _err = res.Message;
+                }
+            }
+            //Update
+            else
+            {
+                var res = await ds.FrpPermissionService.ChangePermissionAsync(ac, auth.FrpAuthService);
+                if (res.ErrorType != FrpErrorType.ErrorNone)
+                {
+                    _err = res.Message;
+                }
+            }
+        }
+        //Add new
+        else if (FrpPermissionValues.AreAll(ac.PermissionValues, FrpPermissionValue.Undefined) == false)
+        {
+            FrpPermission access = new()
+            {
+                MemberId = ac.MemberId,
+                MemberIdKind = kind,
+                AccessUri = Uri,
+                AccessUriScheme = AccessUriScheme.Content,
+                PermissionValues = new()
+                {
+                    Add = ac.PermissionValues.Add,
+                    Change = ac.PermissionValues.Change,
+                    Delete = ac.PermissionValues.Delete,
+                    Read = ac.PermissionValues.Read
+                }
+            };
+
+            var res = await ds.FrpPermissionService.AddPermissionAsync(access, auth.FrpAuthService);
+            if (res.ErrorType == FrpErrorType.ErrorNone)
+            {
+                await LoadPermissionAsync();
+                ac = access.Clone();
+            }
+            else
+            {
+                _err = res.Message;
+            }
+        }
+    }
+}

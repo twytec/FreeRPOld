@@ -1,0 +1,32 @@
+﻿<FluentStack Orientation="Orientation.Vertical" VerticalGap="MainLayout.StackGap" Style="padding: 4px; height: 100vh; overflow: hidden; align-items: stretch;" Width="100%">
+    <FluentToolbar Style="width: 100%;">
+        <FluentButton OnClick="RoleAddClick">@I18n.Text.AddRole</FluentButton>
+        @if (_role is not null)
+        {
+            <FluentButton OnClick="RoleEditClick">@I18n.Text.ChangeRole</FluentButton>
+            <FluentButton OnClick="RoleDeleteClick">@I18n.Text.DeleteRole</FluentButton>
+            <FluentButton OnClick="AddUser">@I18n.Text.AddUser</FluentButton>
+        }
+    </FluentToolbar>
+    <div style="width: 100%;">
+        <FluentCombobox Label="@I18n.Text.Role"
+                        Placeholder="@I18n.Text.PleaseSelect"
+                        TOption="GrpcService.Core.Role"
+                        Items="AdminService.AdminData.Roles"
+                        OptionValue="@(p => p.RoleId)"
+                        OptionText="@(p => p.Name)"
+                        Multiple="false" Width="100%" SelectedOptionChanged="RoleChange" />
+    </div>
+    
+    @if (_role is not null && _users is not null && _users.Any())
+    {
+        <FluentStack Wrap="true" HorizontalGap="MainLayout.StackGap">
+            @foreach (var u in _users)
+            {
+                <FluentButton IconEnd="@(new Icons.Regular.Size24.Delete())" OnClick="(() => DeleteUser(u.Key))">
+                    @((MarkupString)u.Value)
+                </FluentButton>
+            }
+        </FluentStack>
+    }
+</FluentStack>

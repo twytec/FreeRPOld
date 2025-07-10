@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.GrpcService.Transport";
+import "core.proto";
+
+package transport;
+
+service TransportService {
+	rpc Upload (TransportMessage) returns (TransportMessage);
+	rpc Download (TransportMessage) returns (TransportMessage);
+}
+
+message TransportMessage {
+	string id = 1;
+	core.ErrorType error_type = 2;
+	bool e_o_f = 3;
+	bytes data = 4;
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option csharp_namespace = "FreeRP.Projects";
+import "core.proto";
+
+package project;
+
+service ProjectService {
+	
+	//Returns all Projects
+	rpc GetProjects (core.Empty) returns (ProjectsResponse);
+
+	//Adds the project, if not exists. For administrators only.
+	rpc AddProject (core.User) returns (core.FrpResponse);
+
+	//Changes the project, if exists. For administrators only.
+	rpc ChangeProject (core.User) returns (core.FrpResponse);
+
+	//Delets the project, if exists. For administrators only.
+	rpc DeleteProject (core.User) returns (core.FrpResponse);
+}
+
+message ProjectsResponse {
+	// Error
+	core.ErrorType error_type = 1;
+	repeated Project projects = 2;
+}
+
+message Project {
+	string project_id = 1;
+	string name = 2;
+	repeated string manager = 3;
+	repeated ProjectRole roles = 4;
+}
+
+message ProjectRole {
+	string project_role_id = 1;
+	string name = 2;
+	repeated string member = 3;
+}
